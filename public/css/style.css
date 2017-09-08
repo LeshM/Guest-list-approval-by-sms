@@ -1,0 +1,160 @@
+.center {
+    text-align: center;
+}
+
+.some-padding {
+    padding: .5em;
+}
+
+.some-margin {
+    margin: 2em;
+}
+
+.margin-top-0 {
+    margin-top: 0;
+}
+
+.margin-bottom-0 {
+    margin-bottom: 0;
+}
+
+table.md-table td.md-cell, table.md-table th.md-column {
+    text-align: right;
+}
+
+.selected-value {
+    color: green;
+}
+
+.animate-show-hide:not(.trans) {
+    transition: all 500ms ease;
+    transform: scale(1);
+}
+
+.ng-hide.animate-show-hide,
+.ng-hide.animate-show-hide .animate-show-hide,
+.ng-hide.animate-show-hide .animate-show-hide > svg {
+    font-size: 0 !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    margin: 0 !important;
+    transform: scale(0);
+}
+
+.ng-hide.animate-show-hide.max-size,
+.ng-hide.animate-show-hide.max-size .animate-show-hide.max-size,
+.ng-hide.animate-show-hide.max-size .animate-show-hide.max-size > svg {
+    line-height: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+.md-datepicker-triangle-button {
+    right: auto;
+}
+
+.md-calendar-month-label {
+    text-align: right;
+    padding: 0 24px 0 0;
+}
+
+.md-calendar-scroll-container, .md-datepicker-input-mask {
+    width: initial;
+}
+
+.ltr {
+    direction: ltr;
+}
+
+.pac-item {
+    text-align: right;
+}
+
+.pac-logo:after {
+    background-position: left;
+    margin: 0 0 2px 5px;
+}
+
+table.md-table:not(.md-row-select) td.md-cell:nth-child(n+2):nth-last-child(n+2),
+table.md-table:not(.md-row-select) th.md-column:nth-child(n+2):nth-last-child(n+2) {
+    padding: 0;
+}
+
+.messages {
+    width: 30em;
+}
+
+.message {
+    max-width: 75%;
+}
+
+.message.to-guest {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+.message.from-guest {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.message-title {
+    font-weight: bold;
+}
+
+.message-date {
+    font-size: .9em;
+    color: gray;
+    text-align: left;
+    margin-top: .5em;
+}
+
+md-radio-button {
+    margin-bottom: 0;
+}
+
+.md-cell md-input-container {
+    margin: 0;
+}
+
+.md-cell md-input-container .md-input {
+    margin-top: 1em;
+}
+
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+html[dir=rtl] .ltr md-input-container label {
+    left: 0;
+    right: auto;
+}
+
+html[dir=rtl] .ltr md-input-container label {
+    padding-left: 3px;
+    padding-right: 0;
+    -webkit-transform-origin: left top;
+    transform-origin: left top;
+    unicode-bidi: embed;
+}
+
+.md-button.md-fab.send-all-btn {
+    width: 8em;
+    height: 8em;
+    line-height: 1.5;
+}
+
+.md-column:last-of-type {
+    text-align: center;
+}
+
+md-tooltip {
+    font-size: 1em;
+}
+md-tooltip .md-content {
+    padding: .2em .4em;
+}

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" ng-app="wedApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://rawgit.com/daniel-nagy/md-data-table/master/dist/md-data-table.css">
+    <link rel="stylesheet" href="css/glyphs.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/material-datetimepicker.css">
+    <title>חתונה</title>
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+    <script src="https://rawgit.com/daniel-nagy/md-data-table/master/dist/md-data-table.js"></script>
+    <script src="//maps.googleapis.com/maps/api/js?libraries=places&v=3&key=AIzaSyCbBtrzRfUOUh3ln_aV31Pm4GCVtO6IkKk"></script>
+
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+    <script src="js/angular-webstorage.min.js"></script>
+    <script src="js/wedApp.js"></script>
+    <script src="js/alertConfirmService.js"></script>
+    <script src="js/googlePlacesDirective.js"></script>
+    <script src="js/moment-with-locales.js"></script>
+    <script src="js/angular-material-datetimepicker.js"></script>
+    <script src="js/angular-sanitize.min.js"></script>
+    <script src="js/ng-csv.min.js"></script>
+</head>
+<body ng-controller="messageController">
+<md-content style="height: 100%">
+    <md-content class="some-padding layout-column">
+        <md-card class="flex-100 layout-row layout-align-center-center layout-padding">
+            <md-toolbar class="md-table-toolbar md-default flex no-wrap">
+                <div class="md-toolbar-tools"><span>קובץ מוזמנים</span></div>
+            </md-toolbar>
+            <md-input-container class="flex-90 margin-bottom-0">
+                <md-tooltip>ניתן להעלות כל קובץ אקסל ל - Google Sheets ולהשתמש בקישור שלו כאן. המערכת מבוססת על קישור זה, כדי להתחיל מחדש פשוט השתמשו בקישור חדש.</md-tooltip>
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="guestListUrl"
+                       ng-blur="storeData('guestListUrl', guestListUrl, $event)"
+                       aria-label="קישור לרשימת מוזמנים ב - Google Sheets"
+                       placeholder="קישור לרשימת מוזמנים ב - Google Sheets"
+                       dir="auto"/>
+            </md-input-container>
+            <md-input-container class="flex-10 margin-bottom-0">
+                <md-tooltip>באיזו שורה נמצאות הכותרות? במידה ולא הוזן ערך, המערכת תניח שהן בשורה 1</md-tooltip>
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="headerRow"
+                       ng-blur="storeData('headerRow', headerRow, $event)"
+                       aria-label="שורת כותרות"
+                       placeholder="שורת כותרות"
+                       type="number"
+                       min="0"/>
+            </md-input-container>
+            <md-button ng-disabled="isShowCodeInput || promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">טען קובץ</md-button>
+        </md-card>
+        <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding ltr"
+                 ng-show="guestListData">
+            <md-toolbar class="md-table-toolbar md-default flex-20 no-wrap">
+                <div class="md-toolbar-tools"><span>SMS Api (Nexmo)</span></div>
+            </md-toolbar>
+            <md-input-container class="flex margin-bottom-0">
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="apiKey"
+                       ng-blur="storeData('apiKey', apiKey, $event)"
+                       aria-label="API Key"
+                       placeholder="API Key"
+                       dir="auto"/>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="apiSecret"
+                       ng-blur="storeData('apiSecret', apiSecret, $event)"
+                       aria-label="API Secret"
+                       placeholder="API Secret"
+                       dir="auto"/>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <md-tooltip>מספר זה נדרש כדי לקבל ולפענח את ההודעות שהאורחים שולחים חזרה למערכת, יש לרכוש מספר ב - Nexmo ולהזין אותו כאן. במידה ותרצו לשלוח הודעות בלבד, בלי יכולת לקבל מענה, ניתן להזין פה שם באנגלית</md-tooltip>
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="smsSenderNumber"
+                       ng-blur="storeData('smsSenderNumber', smsSenderNumber, $event)"
+                       aria-label="SMS Sender Number"
+                       placeholder="SMS Sender Number"
+                       dir="auto"/>
+            </md-input-container>
+            <a href="https://dashboard.nexmo.com" target="_blank">
+                <md-tooltip>כדי לקבל את פרטי ה - API הנדרשים לשליחת ההודעות, יש ליצור חשבון ב - Nexmo ולהטעין אותו בכסף (מינימום 10€)</md-tooltip>
+                <md-button class="md-raised">
+                    <md-icon>link</md-icon>
+                    <span>Nexmo Dashboard</span>
+                </md-button>
+            </a>
+        </md-card>
+        <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding"
+                 ng-show="guestListData">
+            <md-toolbar class="md-table-toolbar md-default flex no-wrap">
+                <div class="md-toolbar-tools"><span>פרטי אירוע</span></div>
+            </md-toolbar>
+            <md-input-container class="flex margin-bottom-0">
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="brideAndGroom"
+                       ng-blur="storeData('brideAndGroom', brideAndGroom, $event)"
+                       aria-label="שם הזוג"
+                       placeholder="שם הזוג"
+                       dir="auto"/>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="venue"
+                       ng-blur="storeData('venue', venue, $event)"
+                       aria-label="שם האולם"
+                       placeholder="שם האולם"
+                       dir="auto"/>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <input mdc-datetime-picker
+                       date="true"
+                       time="true"
+                       placeholder="תאריך ושעת האירוע"
+                       show-todays-date="false"
+                       min-date="today"
+                       ng-model="eventDate"
+                       class="md-input animate-show-hide"
+                       format="dddd DD-MM-YY HH:mm"
+                       ng-change="storeData('eventDate', formatDateTime(eventDate, 'dddd DD-MM-YY HH:mm'), $event)"
+                       readonly>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <input mdc-datetime-picker
+                       date="false"
+                       time="true"
+                       short-time="true"
+                       format="HH:mm"
+                       placeholder="שעת חופה"
+                       show-todays-date="false"
+                       min-date="today"
+                       ng-model="eventTime"
+                       class="md-input animate-show-hide"
+                       format="HH:mm"
+                       ng-change="storeData('eventTime', formatDateTime(eventTime, 'HH:mm'), $event)"
+                       readonly>
+            </md-input-container>
+            <md-input-container class="flex margin-bottom-0">
+                <md-tooltip>במידה ומזינים כתובת, היא תישלח בהודעות בצירוף קישור הגעה ב - Waze</md-tooltip>
+                <input class="animate-show-hide"
+                       ng-disabled="isShowCodeInput || promise"
+                       ng-show="!isShowCodeInput"
+                       ng-model="venueLocation"
+                       lat-lon="latLon"
+                       on-place-changed="storeData('venueLocation', venueLocation, $event); storeData('venueLatLon', latLon, $event)"
+                       aria-label="venueLocation"
+                       placeholder="כתובת האולם (לשליחת הוראות הגעה)"
+                       dir="auto"
+                       google-places/>
+            </md-input-container>
+        </md-card>
+        <md-card class="flex-100 layout-row animate-show-hide layout-padding"
+                 ng-show="isShowCodeInput && !guestListData">
+            <md-input-container class="flex">
+                <input ng-disabled="promise" ng-model="authCode" aria-label="auth code" placeholder="קוד אישור"
+                       dir="auto"/>
+            </md-input-container>
+            <md-button ng-disabled="promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">שלח
+                קוד אישור
+            </md-button>
+        </md-card>
+    </md-content>
+    <md-content class="some-padding animate-show-hide" ng-show="guestListData">
+        <md-card class="animate-show-hide" ng-show="sheet.guests"
+                 ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+            <div class="layout-padding">
+                <md-radio-group ng-model="templateOrManual"
+                                ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+                    <md-radio-button ng-value="'template'" aria-label="הודעה מוכנה מראש">הודעה מוכנה מראש
+                    </md-radio-button>
+                    <md-radio-button ng-value="'manual'" aria-label="הודעה ידנית">הודעה ידנית</md-radio-button>
+                </md-radio-group>
+                <div class="layout-row animate-show-hide" ng-show="templateOrManual == 'template'">
+                    <md-input-container class="animate-show-hide margin-bottom-0 margin-top-0">
+                        <md-select ng-model="messageType" aria-label="message type"
+                                   ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+                            <md-option value="invite" selected="selected">הזמנה</md-option>
+                            <md-option value="approval">תשובת אישור</md-option>
+                            <md-option value="reminder">תזכורת + הוראות הגעה</md-option>
+                            <md-option value="thanks">תודה</md-option>
+                        </md-select>
+                    </md-input-container>
+                </div>
+                <div class="layout-row">
+                    <md-input-container class="animate-show-hide margin-bottom-0 layout flex-100">
+                        <input class="animate-show-hide"
+                               ng-model="messageTypes[templateOrManual == 'template' ? messageType : 'custom']"
+                               aria-label="תוכן ההודעה"
+                               placeholder="תוכן ההודעה"
+                               ng-blur="templateOrManual != 'manual' && storeData(messageType, messageTypes[messageType], $event)"
+                               dir="auto"/>
+                    </md-input-container>
+                </div>
+                <div class="layout-row animate-show-hide" ng-show="templateOrManual == 'template'">
+                    <md-input-container class="animate-show-hide margin-bottom-0 layout flex-100">
+                        <label>תצוגה מקדימה של ההודעה:</label>
+                        <input class="animate-show-hide"
+                               value="{{messageGeneratorMap[messageType]('אורח יקר', brideAndGroom, formatDateTime(eventDate, 'dddd DD-MM-YY HH:mm'), eventTime, venue, venueLocation, venueLocationUrl)}}"
+                               aria-label="תצוגה מקדימה"
+                               readonly
+                               disabled
+                               dir="auto"/>
+                    </md-input-container>
+                </div>
+                <div class="layout-row">
+                    <div class="layout-column flex layout-padding">
+                        <md-checkbox ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot"
+                                     ng-model="isOnlyToUnsentNumbers" class="margin-top-0 margin-bottom-0">רק לאנשים
+                            שטרם
+                            קיבלו הודעה?
+                        </md-checkbox>
+                        <md-checkbox ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot"
+                                     ng-model="isOnlyToApprovedGuests" class="margin-top-0 margin-bottom-0">רק לאנשים
+                            שאישרו
+                            הגעה?
+                        </md-checkbox>
+                        <md-checkbox ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot"
+                                     ng-model="isOnlyToGuestsWithNoAnswer" class="margin-top-0 margin-bottom-0">רק
+                            לאורחים
+                            שטרם ענו
+                        </md-checkbox>
+                        <md-checkbox ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot"
+                                     ng-model="isOnlyToGuestsWhoBroughtGifts" class="margin-top-0 margin-bottom-0">רק
+                            לאנשים
+                            שנתנו מתנה
+                        </md-checkbox>
+                    </div>
+                    <md-button class="md-raised md-accent md-fab some-margin send-all-btn" ng-click="sendAllSMS($event)"
+                               ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+                        <div>התחל שליחת</div>
+                        <div>הודעות SMS</div>
+                        <div>לכל הרשימה</div>
+                    </md-button>
+                </div>
+                <span ng-show="smsRequestsSent || smsResponsesGot">{{smsRequestsSent}} / {{smsResponsesGot}}</span>
+            </div>
+            <md-progress-linear md-mode="determinate"
+                                ng-value="smsResponsesGot / smsRequestsSent * 100"></md-progress-linear>
+        </md-card>
+        <md-card class="layout-row layout-align-space-between-stretch" ng-hide="sheet">
+            <md-toolbar class="md-table-toolbar md-default animate-show-hide flex-20"
+                        ng-hide="options.rowSelection && selected.length">
+                <div class="md-toolbar-tools"><span>בחירת עמודות</span></div>
+            </md-toolbar>
+            <div class="layout-row layout-padding flex">
+                <!-- Name column -->
+                <md-input-container class="flex">
+                    <label>שם</label>
+                    <md-select ng-model="nameColumnIndex"
+                               ng-change="storeData('nameColumnIndex', nameColumnIndex, $event)"
+                               ng-disabled="promises.nameColumnIndex"
+                               ng-class="{'selected-value': nameColumnIndex !== undefined}"
+                               placeholder="שם">
+                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                            {{header.display}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+                <!-- Guest count column -->
+                <md-input-container class="flex">
+                    <label>מספר מוזמנים</label>
+                    <md-select ng-model="guestCountColumnIndex"
+                               ng-change="storeData('guestCountColumnIndex', guestCountColumnIndex, $event)"
+                               ng-disabled="promises.guestCountColumnIndex"
+                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                               placeholder="מספר מוזמנים">
+                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                            {{header.display}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+                <!-- Phone number column -->
+                <md-input-container class="flex">
+                    <label>מספר טלפון</label>
+                    <md-select ng-model="phoneNumberColumnIndex"
+                               ng-change="storeData('phoneNumberColumnIndex', phoneNumberColumnIndex, $event)"
+                               ng-disabled="promises.phoneNumberColumnIndex"
+                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                               placeholder="מספר טלפון">
+                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                            {{header.display}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+                <!-- Approved guest count column -->
+                <md-input-container class="flex">
+                    <label>אורחים שאישרו</label>
+                    <md-select ng-model="approvedGuestCountColumnIndex"
+                               ng-change="storeData('approvedGuestCountColumnIndex', approvedGuestCountColumnIndex, $event)"
+                               ng-disabled="promises.approvedGuestCountColumnIndex"
+                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                               placeholder="אורחים שאישרו">
+                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                            {{header.display}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+                <md-button class="md-raised md-accent some-margin"
+                           ng-disabled="!nameColumnIndex || !guestCountColumnIndex || !phoneNumberColumnIndex || promise"
+                           ng-click="importData($event)">יבא נתונים
+                </md-button>
+            </div>
+        </md-card>
+        <!-- Guest Table -->
+        <md-card>
+            <md-toolbar class="md-table-toolbar md-default animate-show-hide"
+                        ng-hide="options.rowSelection && selected.length">
+                <div class="md-toolbar-tools some-padding layout-row layout-align-space-between">
+                    <div class="layout-row ">
+                        <div class="layout-row">
+                            <span class="some-padding animate-show-hide">מספר מוזמנים:</span>
+                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>
+                        </div>
+                        <div class="some-padding animate-show-hide">/</div>
+                        <div class="layout-row">
+                            <span class="some-padding animate-show-hide">מספר מגיעים:</span>
+                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalApprovedCount()}}</span>
+                        </div>
+                        <div class="some-padding animate-show-hide">=</div>
+                        <div class="layout-row">
+                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">%{{getTotalApprovedCount() / getTotalGuestCount() * 100}}</span>
+                        </div>
+                    </div>
+                    <div class="layout-row">
+                        <div class="layout-row">
+                            <span class="some-padding animate-show-hide">מנות צמחוניות:</span>
+                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('צמחונית')}}</span>
+                        </div>
+                        <div class="some-padding animate-show-hide">/</div>
+                        <div class="layout-row">
+                            <span class="some-padding animate-show-hide">מנות טבעוניות:</span>
+                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
+                        </div>
+                    </div>
+                </div>
+            </md-toolbar>
+
+            <md-table-container>
+                <table md-table md-progress="promise">
+                    <thead ng-if="::!options.decapitate" md-head md-order="query.order">
+                    <tr md-row>
+                        <th md-column md-order-by="{{::header.key}}" ng-repeat="header in guestListData.headers"><span>{{::header.display}}</span>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody md-body>
+                    <tr md-row ng-repeat="guest in guestListData.rows | orderBy: query.order | limitTo: rowsToShow">
+                        <td md-cell ng-repeat="header in guestListData.headers"
+                            ng-disabled="guest.isDisabled || (header.key != 'phoneNumber' && !guest._id)">
+                            <!-- ng-switch didn't work -->
+                            <span ng-if="!header.type && header.isReadOnly">{{::formatField(guest[header.key], header.key)}}</span>
+                            <md-input-container
+                                    ng-if="(header.type || header.options || header.isCheckBox) && !header.isCustom">
+                                <input ng-if="header.type"
+                                       type="{{header.type}}"
+                                       ng-model="guest[header.key]"
+                                       ng-blur="updateGuestField(guest, header.key, guest[header.key], $event)"
+                                       ng-readonly="guest.isDisabled || header.isReadOnly || (header.key != 'phoneNumber' && !guest._id)"
+                                       min="0"
+                                       ng-min="0"
+                                       aria-label="{{header.key}}"/>
+                                <md-select ng-if="header.options" ng-model="guest[header.key]"
+                                           ng-change="updateGuestField(guest, header.key, guest[header.key], $event)"
+                                           ng-disabled="guest.isDisabled || header.key != 'phoneNumber' && !guest._id"
+                                           aria-label="{{header.key}}">
+                                    <md-option ng-repeat="option in header.options" ng-value="option">{{option}}
+                                    </md-option>
+                                </md-select>
+                                <md-checkbox ng-if="header.isCheckBox" ng-model="guest[header.key]"
+                                             ng-change="updateGuestField(guest, header.key, guest[header.key], $event)"
+                                             ng-disabled="guest.isDisabled || header.key != 'phoneNumber' && !guest._id"
+                                             aria-label="{{header.key}}"></md-checkbox>
+                            </md-input-container>
+                            <md-button ng-if="header.isCustom"
+                                       class="md-raised md-accent"
+                                       ng-click="showMessages(guest, $event)"
+                                       ng-show="sheet"
+                                       ng-disabled="!guest.messages || !guest.messages.length">הצג
+                            </md-button>
+                        </td>
+                        <td md-cell class="no-wrap">
+                            <md-button class="md-raised md-accent animate-show-hide"
+                                       ng-click="sendSingleSMS(guest, $event)"
+                                       ng-show="sheet"
+                                       ng-disabled="guest.isDisabled || !guest.phoneNumber || singleSmsPromise || (header.key != 'phoneNumber' && !guest._id)">שלח
+                            </md-button>
+                            <md-button class="md-raised md-accent md-icon-button animate-show-hide"
+                                       ng-click="disableGuest(guest, $index, $event)"
+                                       ng-show="sheet"
+                                       ng-disabled="singleSmsPromise">
+                                <md-tooltip md-direction="right" ng-show="!guest._id">מחק אורח חדש</md-tooltip>
+                                <md-tooltip md-direction="right" ng-show="guest._id && !guest.isDisabled">השהה אורח (לא יקבל הודעות)</md-tooltip>
+                                <md-tooltip md-direction="right" ng-show="guest.isDisabled">הפעל אורח (יקבל הודעות)</md-tooltip>
+                                <md-icon class="animate-show-hide" ng-show="!guest._id">delete_forever</md-icon>
+                                <md-icon class="animate-show-hide" ng-show="guest._id && !guest.isDisabled">pause</md-icon>
+                                <md-icon class="animate-show-hide" ng-show="guest.isDisabled">replay</md-icon>
+                            </md-button>
+                        </td>
+                    </tr>
+                    <tr md-row class="animate-show-hide" ng-show="rowsToShow < guestListData.rows.length">
+                        <td colspan="{{guestListData.headers.length + 1}}">
+                            <md-button class="md-raised" ng-click="showMore()">הצג עוד
+                            </md-button>
+                            <md-button class="md-raised" ng-click="showMore(true)">הצג הכל
+                            </md-button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </md-table-container>
+
+            <div class="layout-row layout-align-space-between">
+                <md-button class="md-raised md-accent md-fab some-margin" ng-if="sheet" ng-click="addGuest()" ng-disabled="newGuest">
+                    <md-tooltip md-direction="left">הוסף אורח חדש</md-tooltip>
+                    <md-icon>add</md-icon>
+                </md-button>
+
+                <md-button class="md-raised md-accent md-fab some-margin"
+                           ng-if="sheet"
+                           ng-csv="getCsvRows(guestListData.rows)"
+                           csv-header="getCsvHeaders(guestListData.headers)"
+                           filename="Lesh_M.csv"
+                           lazy-load="true"
+                           add-bom="true">
+                    <md-tooltip md-direction="right">יצא לקובץ CSV</md-tooltip>
+                    <md-icon>file_download</md-icon>
+                </md-button>
+            </div>
+        </md-card>
+    </md-content>
+</md-content>
+</body>
+</html>
