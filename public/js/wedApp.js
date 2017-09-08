@@ -73,7 +73,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
 
         $scope.storeData = function (key, value, $event) {
             if ($scope.guestListUrl) {
-                if (key == 'guestListUrl') {
+                if (key == 'guestListUrl' || 'headerRow') {
                     webStorage.set(key, value);
                 }
 
@@ -337,7 +337,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                 '       <md-card ng-repeat="message in guest.messages | orderBy:\'messageDate\'" class="message" ng-class="message.direction">' +
                 '           <span class="message-title">{{message.direction == \'from-guest\' ? guest.name : \'מערכת\'}}</span>' +
                 '           <span class="message-text" ng-bind-html="message.messageHtml"></span>' +
-                '           <span class="message-date">{{message.messageDate | date: \'dd/MM/yy hh:mm:ss\'}}</span>' +
+                '           <span class="message-date">{{message.messageDate | date: \'dd/MM/yy | HH:mm:ss\'}}</span>' +
                 '       </md-card>' +
                 '  </md-content>' +
                 '</md-dialog-content>' +
