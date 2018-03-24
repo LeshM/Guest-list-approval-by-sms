@@ -158,3 +158,7 @@ md-tooltip {
 md-tooltip .md-content {
     padding: .2em .4em;
 }
+
+.small-label {
+    font-size: .75em;
+}

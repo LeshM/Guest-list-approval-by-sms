@@ -362,7 +362,10 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
 
             if ($scope.guestListData) {
                 angular.forEach($scope.guestListData.rows, function (row) {
-                    totalGuests += Number(row.guestCount || row[$scope.guestCountColumnIndex] || 0);
+                    var data = row.guestCount || row[$scope.guestCountColumnIndex] || 0;
+                    if (!isNaN(data)) {
+                        totalGuests += Number(data);
+                    }
                 });
             }
 
@@ -374,7 +377,10 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
 
             if ($scope.guestListData) {
                 angular.forEach($scope.guestListData.rows, function (row) {
-                    totalApproved += Number(row.approvedGuestCount || row[$scope.approvedGuestCountColumnIndex] || 0);
+                    var data = row.approvedGuestCount || row[$scope.approvedGuestCountColumnIndex] || 0;
+                    if (!isNaN(data)) {
+                        totalApproved += Number(data);
+                    }
                 });
             }
 

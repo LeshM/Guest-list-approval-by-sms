@@ -16,7 +16,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
     <script src="https://rawgit.com/daniel-nagy/md-data-table/master/dist/md-data-table.js"></script>
-    <script src="//maps.googleapis.com/maps/api/js?libraries=places&v=3&key=AIzaSyCbBtrzRfUOUh3ln_aV31Pm4GCVtO6IkKk"></script>
+    <script src="//maps.googleapis.com/maps/api/js?libraries=places&v=3&language=iw&key=AIzaSyCbBtrzRfUOUh3ln_aV31Pm4GCVtO6IkKk"></script>
 
     <!-- Angular Material Library -->
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
@@ -35,6 +35,8 @@
         <md-card class="flex-100 layout-row layout-align-center-center layout-padding">
             <md-toolbar class="md-table-toolbar md-default flex no-wrap">
                 <div class="md-toolbar-tools"><span>קובץ מוזמנים</span></div>
+                <div class="small-label"><span>תבנית לדוגמה, זמינה </span><a href="https://docs.google.com/spreadsheets/d/1PMh3NLn5RYt8AFfupeSqXefyVRgJveVUhCvkHJ2DNJw/edit#gid=665690942" target="_blank">כאן</a></div>
+                <div class="small-label"><span>להורדת קובץ תבנית הדוגמה, לחץ </span><a href="/wedding_invitations_template_he-IL.xls.xlsx">כאן</a></div>
             </md-toolbar>
             <md-input-container class="flex-90 margin-bottom-0">
                 <md-tooltip>ניתן להעלות כל קובץ אקסל ל - Google Sheets ולהשתמש בקישור שלו כאן. המערכת מבוססת על קישור זה, כדי להתחיל מחדש פשוט השתמשו בקישור חדש.</md-tooltip>
@@ -86,17 +88,17 @@
                        placeholder="API Secret"
                        dir="auto"/>
             </md-input-container>
-            <md-input-container class="flex margin-bottom-0">
-                <md-tooltip>מספר זה נדרש כדי לקבל ולפענח את ההודעות שהאורחים שולחים חזרה למערכת, יש לרכוש מספר ב - Nexmo ולהזין אותו כאן. במידה ותרצו לשלוח הודעות בלבד, בלי יכולת לקבל מענה, ניתן להזין פה שם באנגלית</md-tooltip>
-                <input class="animate-show-hide"
-                       ng-disabled="isShowCodeInput || promise"
-                       ng-show="!isShowCodeInput"
-                       ng-model="smsSenderNumber"
-                       ng-blur="storeData('smsSenderNumber', smsSenderNumber, $event)"
-                       aria-label="SMS Sender Number"
-                       placeholder="SMS Sender Number"
-                       dir="auto"/>
-            </md-input-container>
+            <!--<md-input-container class="flex margin-bottom-0">-->
+                <!--<md-tooltip>מספר זה נדרש כדי לקבל ולפענח את ההודעות שהאורחים שולחים חזרה למערכת, יש לרכוש מספר ב - Nexmo ולהזין אותו כאן. במידה ותרצו לשלוח הודעות בלבד, בלי יכולת לקבל מענה, ניתן להזין פה שם באנגלית</md-tooltip>-->
+                <!--<input class="animate-show-hide"-->
+                       <!--ng-disabled="isShowCodeInput || promise"-->
+                       <!--ng-show="!isShowCodeInput"-->
+                       <!--ng-model="smsSenderNumber"-->
+                       <!--ng-blur="storeData('smsSenderNumber', smsSenderNumber, $event)"-->
+                       <!--aria-label="SMS Sender Number"-->
+                       <!--placeholder="SMS Sender Number"-->
+                       <!--dir="auto"/>-->
+            <!--</md-input-container>-->
             <a href="https://dashboard.nexmo.com" target="_blank">
                 <md-tooltip>כדי לקבל את פרטי ה - API הנדרשים לשליחת ההודעות, יש ליצור חשבון ב - Nexmo ולהטעין אותו בכסף (מינימום 10€)</md-tooltip>
                 <md-button class="md-raised">

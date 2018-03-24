@@ -14,7 +14,18 @@ angular.module('googlePlaces', [])
                     var geoComponents = scope.gPlace.getPlace();
                     if (geoComponents) {
                         scope.$apply(function () {
-                            scope.ngModel = (scope.gPlace.gm_accessors_.place.Ec || scope.gPlace.gm_accessors_.place.Gc).formattedPrediction;
+                            var place = scope.gPlace.gm_accessors_ && scope.gPlace.gm_accessors_.place;
+                            var prediction;
+
+                            for (var placeResultKey in place) {
+                                var placeResult = place[placeResultKey];
+                                if (placeResult.formattedPrediction) {
+                                    prediction = placeResult.formattedPrediction;
+                                    break;
+                                }
+                            }
+
+                            scope.ngModel = prediction || element.val();
                             scope.latLon =
                                 (geoComponents.geometry && geoComponents.geometry.location && geoComponents.geometry.location.lat() || '') + ',' +
                                 (geoComponents.geometry && geoComponents.geometry.location && geoComponents.geometry.location.lng() || '');
