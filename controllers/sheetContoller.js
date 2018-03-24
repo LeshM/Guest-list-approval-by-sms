@@ -7,8 +7,10 @@ const utils = require('../utils');
 exports.updateColumnMiddleware = function (req, res, next) {
     exports.updateColumn(req.sheetId, req.params.fieldName, req.params.fieldValue)
         .then(function (updatedSheet) {
-            updatedSheet[req.params.fieldName] = req.params.fieldValue;
-            req.sheetDoc = updatedSheet;
+            if (updatedSheet) {
+                updatedSheet[req.params.fieldName] = req.params.fieldValue;
+                req.sheetDoc = updatedSheet;
+            }
             next();
         })
         .catch(next);
@@ -16,7 +18,7 @@ exports.updateColumnMiddleware = function (req, res, next) {
 
 exports.updateColumn = function (sheetId, fieldName, fieldValue) {
     var update = {};
-    update[fieldName] = fieldValue || '';
+    update[fieldName] = fieldValue !== undefined ? fieldValue : '';
     return Sheet.findOneAndUpdate({sheetId: sheetId}, {$set: update})
         .exec();
 };

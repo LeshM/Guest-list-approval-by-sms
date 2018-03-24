@@ -78,7 +78,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                 }
 
                 if (!$scope.promises[key]) {
-                    $scope.promises[key] = $http.put('/field/' + encodeURIComponent(key) + '/' + encodeURIComponent(value || ''), {guestListUrl: $scope.guestListUrl}, {timeout: $scope.promises[key]})
+                    $scope.promises[key] = $http.put('/field/' + encodeURIComponent(key) + '/' + encodeURIComponent(value !== undefined ? value : ''), {guestListUrl: $scope.guestListUrl}, {timeout: $scope.promises[key]})
                         .catch(function (err) {
                             if (err.status != -1 && err.status != 401) {
                                 console.error(err);
