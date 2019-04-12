@@ -90,15 +90,15 @@
                        dir="auto"/>
             </md-input-container>
             <!--<md-input-container class="flex margin-bottom-0">-->
-                <!--<md-tooltip>מספר זה נדרש כדי לקבל ולפענח את ההודעות שהאורחים שולחים חזרה למערכת, יש לרכוש מספר ב - Nexmo ולהזין אותו כאן. במידה ותרצו לשלוח הודעות בלבד, בלי יכולת לקבל מענה, ניתן להזין פה שם באנגלית</md-tooltip>-->
-                <!--<input class="animate-show-hide"-->
-                       <!--ng-disabled="isShowCodeInput || promise"-->
-                       <!--ng-show="!isShowCodeInput"-->
-                       <!--ng-model="smsSenderNumber"-->
-                       <!--ng-blur="storeData('smsSenderNumber', smsSenderNumber, $event)"-->
-                       <!--aria-label="SMS Sender Number"-->
-                       <!--placeholder="SMS Sender Number"-->
-                       <!--dir="auto"/>-->
+            <!--<md-tooltip>מספר זה נדרש כדי לקבל ולפענח את ההודעות שהאורחים שולחים חזרה למערכת, יש לרכוש מספר ב - Nexmo ולהזין אותו כאן. במידה ותרצו לשלוח הודעות בלבד, בלי יכולת לקבל מענה, ניתן להזין פה שם באנגלית</md-tooltip>-->
+            <!--<input class="animate-show-hide"-->
+            <!--ng-disabled="isShowCodeInput || promise"-->
+            <!--ng-show="!isShowCodeInput"-->
+            <!--ng-model="smsSenderNumber"-->
+            <!--ng-blur="storeData('smsSenderNumber', smsSenderNumber, $event)"-->
+            <!--aria-label="SMS Sender Number"-->
+            <!--placeholder="SMS Sender Number"-->
+            <!--dir="auto"/>-->
             <!--</md-input-container>-->
             <a href="https://dashboard.nexmo.com" target="_blank">
                 <md-tooltip>כדי לקבל את פרטי ה - API הנדרשים לשליחת ההודעות, יש ליצור חשבון ב - Nexmo ולהטעין אותו בכסף (מינימום 10€)</md-tooltip>
@@ -319,35 +319,23 @@
         </md-card>
         <!-- Guest Table -->
         <md-card>
-            <md-toolbar class="md-table-toolbar md-default animate-show-hide"
-                        ng-hide="options.rowSelection && selected.length">
-                <div class="md-toolbar-tools some-padding layout-row layout-align-space-between">
+            <md-toolbar class="md-table-toolbar md-default animate-show-hide" ng-hide="options.rowSelection && selected.length">
+                <div class="layout-row layout-align-space-between md-toolbar-tools">
                     <div class="layout-row ">
-                        <span>תצוגה מקדימה של הנתונים</span>
-                        <div class="layout-row">
-                            <span class="some-padding animate-show-hide">מספר מוזמנים:</span>
-                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>
-                        </div>
+                        <span class="some-padding animate-show-hide">מספר מוזמנים:</span>
+                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>
                         <div class="some-padding animate-show-hide">/</div>
-                        <div class="layout-row">
-                            <span class="some-padding animate-show-hide">מספר מגיעים:</span>
-                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalApprovedCount()}}</span>
-                        </div>
+                        <span class="some-padding animate-show-hide">מספר מגיעים:</span>
+                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalApprovedCount()}}</span>
                         <div class="some-padding animate-show-hide">=</div>
-                        <div class="layout-row">
-                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">%{{getTotalApprovedCount() / getTotalGuestCount() * 100}}</span>
-                        </div>
+                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">%{{getTotalApprovedCount() / getTotalGuestCount() * 100}}</span>
                     </div>
                     <div class="layout-row">
-                        <div class="layout-row">
-                            <span class="some-padding animate-show-hide">מנות צמחוניות:</span>
-                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('צמחונית')}}</span>
-                        </div>
+                        <span class="some-padding animate-show-hide">מנות צמחוניות:</span>
+                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('צמחונית')}}</span>
                         <div class="some-padding animate-show-hide">/</div>
-                        <div class="layout-row">
-                            <span class="some-padding animate-show-hide">מנות טבעוניות:</span>
-                            <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
-                        </div>
+                        <span class="some-padding animate-show-hide">מנות טבעוניות:</span>
+                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
                     </div>
                 </div>
             </md-toolbar>
@@ -355,9 +343,11 @@
             <md-table-container>
                 <table md-table md-progress="promise">
                     <thead ng-if="::!options.decapitate" md-head md-order="query.order">
+                    <tr class="animate-show-hide" ng-hide="sheet">
+                        <th md-column><h2>תצוגה מקדימה של הנתונים</h2></th>
+                    </tr>
                     <tr md-row>
-                        <th md-column md-order-by="{{::header.key}}" ng-repeat="header in guestListData.headers"><span>{{::header.display}}</span>
-                        </th>
+                        <th md-column md-order-by="{{::header.key}}" ng-repeat="header in guestListData.headers"><span>{{::header.display}}</span></th>
                     </tr>
                     </thead>
                     <tbody md-body>
