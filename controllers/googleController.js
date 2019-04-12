@@ -6,6 +6,7 @@ const googleSettings = require('../config/google-settings');
 const Q = require('q');
 const excelColumnName = require('excel-column-name');
 const Sheet = mongoose.model('Sheet');
+const moment = require('moment');
 
 // If modifying these scopes, delete your previously saved credentials
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -38,7 +39,7 @@ exports.authenticate = function (sheetId, authCode) {
             .lean()
             .exec()
             .then(function (sheet) {
-                if (!sheet) {
+                if (!sheet || moment().isAfter(sheet.token.expiry_date)) {
                     defer.reject({status: 401, authClient: authClient});
                 } else {
                     authClient.credentials = sheet.token;
@@ -82,7 +83,7 @@ exports.getSpreadSheetData = function (authClient, sheetId, headerRow) {
 
     sheets.spreadsheets.values.get({auth: authClient, spreadsheetId: sheetId, range: 'A:Z'}, function (err, response) {
         if (err) {
-            defer.reject('The API returned an error: ' + err);
+            defer.reject(err);
         } else {
             var values = response.values;
             if (!values || !values.length) {

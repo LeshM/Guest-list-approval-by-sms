@@ -100,7 +100,8 @@ app.use(function (err, req, res, next) {
     if (!err) {
         next();
     } else {
-        res.status(500).json(err);
+        console.error(err);
+        res.status(500).json(err.message || err);
     }
 });
 
