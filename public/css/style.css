@@ -2,8 +2,20 @@
     text-align: center;
 }
 
+.padding-0 {
+    padding: 0;
+}
+
 .some-padding {
     padding: .5em;
+}
+
+.padding-top-0 {
+    padding-top: 0;
+}
+
+.padding-bottom-0 {
+    padding-bottom: 0;
 }
 
 .some-margin {

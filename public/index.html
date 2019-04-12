@@ -31,7 +31,8 @@
 </head>
 <body ng-controller="messageController">
 <md-content style="height: 100%">
-    <md-content class="some-padding layout-column">
+    <md-content class="some-padding padding-bottom-0 layout-column">
+        <!-- File url card -->
         <md-card class="flex-100 layout-row layout-align-center-center layout-padding">
             <md-toolbar class="md-table-toolbar md-default flex no-wrap">
                 <div class="md-toolbar-tools"><span>קובץ מוזמנים</span></div>
@@ -63,8 +64,8 @@
             </md-input-container>
             <md-button ng-disabled="isShowCodeInput || promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">טען קובץ</md-button>
         </md-card>
-        <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding ltr"
-                 ng-show="guestListData">
+        <!-- At the moment I just use my own API key & secret on the server so the users won't have to bother with Nexmo -->
+        <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding ltr" ng-show="guestListData && false">
             <md-toolbar class="md-table-toolbar md-default flex-20 no-wrap">
                 <div class="md-toolbar-tools"><span>SMS Api (Nexmo)</span></div>
             </md-toolbar>
@@ -107,9 +108,8 @@
                 </md-button>
             </a>
         </md-card>
-        <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding"
-                 ng-show="guestListData">
-            <md-toolbar class="md-table-toolbar md-default flex no-wrap">
+        <md-card class="flex-100 layout-row animate-show-hide layout-align-center layout-padding" ng-show="guestListData">
+            <md-toolbar class="md-table-toolbar md-default flex-15 padding-0 no-wrap">
                 <div class="md-toolbar-tools"><span>פרטי אירוע</span></div>
             </md-toolbar>
             <md-input-container class="flex margin-bottom-0">
@@ -174,25 +174,19 @@
                        google-places/>
             </md-input-container>
         </md-card>
-        <md-card class="flex-100 layout-row animate-show-hide layout-padding"
-                 ng-show="isShowCodeInput && !guestListData">
+        <md-card class="flex-100 layout-row animate-show-hide layout-padding" ng-show="isShowCodeInput && !guestListData">
             <md-input-container class="flex">
-                <input ng-disabled="promise" ng-model="authCode" aria-label="auth code" placeholder="קוד אישור"
-                       dir="auto"/>
+                <input ng-disabled="promise" ng-model="authCode" aria-label="auth code" placeholder="קוד אישור" dir="auto"/>
             </md-input-container>
-            <md-button ng-disabled="promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">שלח
-                קוד אישור
-            </md-button>
+            <md-button ng-disabled="promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">שלח קוד אישור</md-button>
         </md-card>
     </md-content>
-    <md-content class="some-padding animate-show-hide" ng-show="guestListData">
+    <md-content class="some-padding padding-top-0 animate-show-hide" ng-show="guestListData">
         <md-card class="animate-show-hide" ng-show="sheet.guests"
                  ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
             <div class="layout-padding">
-                <md-radio-group ng-model="templateOrManual"
-                                ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
-                    <md-radio-button ng-value="'template'" aria-label="הודעה מוכנה מראש">הודעה מוכנה מראש
-                    </md-radio-button>
+                <md-radio-group ng-model="templateOrManual" ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+                    <md-radio-button ng-value="'template'" aria-label="הודעה מוכנה מראש">הודעה מוכנה מראש</md-radio-button>
                     <md-radio-button ng-value="'manual'" aria-label="הודעה ידנית">הודעה ידנית</md-radio-button>
                 </md-radio-group>
                 <div class="layout-row animate-show-hide" ng-show="templateOrManual == 'template'">
@@ -262,69 +256,66 @@
             <md-progress-linear md-mode="determinate"
                                 ng-value="smsResponsesGot / smsRequestsSent * 100"></md-progress-linear>
         </md-card>
-        <md-card class="layout-row layout-align-space-between-stretch" ng-hide="sheet">
-            <md-toolbar class="md-table-toolbar md-default animate-show-hide flex-20"
-                        ng-hide="options.rowSelection && selected.length">
+        <md-card class="flex-100 layout-row animate-show-hide layout-align-center layout-padding" ng-hide="sheet">
+            <md-toolbar class="md-table-toolbar md-default flex-15 padding-0 no-wrap animate-show-hide" ng-hide="options.rowSelection && selected.length">
                 <div class="md-toolbar-tools"><span>בחירת עמודות</span></div>
             </md-toolbar>
-            <div class="layout-row layout-padding flex">
-                <!-- Name column -->
-                <md-input-container class="flex">
-                    <label>שם</label>
-                    <md-select ng-model="nameColumnIndex"
-                               ng-change="storeData('nameColumnIndex', nameColumnIndex, $event)"
-                               ng-disabled="promises.nameColumnIndex"
-                               ng-class="{'selected-value': nameColumnIndex !== undefined}"
-                               placeholder="שם">
-                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
-                            {{header.display}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-                <!-- Guest count column -->
-                <md-input-container class="flex">
-                    <label>מספר מוזמנים</label>
-                    <md-select ng-model="guestCountColumnIndex"
-                               ng-change="storeData('guestCountColumnIndex', guestCountColumnIndex, $event)"
-                               ng-disabled="promises.guestCountColumnIndex"
-                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
-                               placeholder="מספר מוזמנים">
-                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
-                            {{header.display}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-                <!-- Phone number column -->
-                <md-input-container class="flex">
-                    <label>מספר טלפון</label>
-                    <md-select ng-model="phoneNumberColumnIndex"
-                               ng-change="storeData('phoneNumberColumnIndex', phoneNumberColumnIndex, $event)"
-                               ng-disabled="promises.phoneNumberColumnIndex"
-                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
-                               placeholder="מספר טלפון">
-                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
-                            {{header.display}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-                <!-- Approved guest count column -->
-                <md-input-container class="flex">
-                    <label>אורחים שאישרו</label>
-                    <md-select ng-model="approvedGuestCountColumnIndex"
-                               ng-change="storeData('approvedGuestCountColumnIndex', approvedGuestCountColumnIndex, $event)"
-                               ng-disabled="promises.approvedGuestCountColumnIndex"
-                               ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
-                               placeholder="אורחים שאישרו">
-                        <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
-                            {{header.display}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-                <md-button class="md-raised md-accent some-margin"
-                           ng-disabled="nameColumnIndex === undefined || guestCountColumnIndex === undefined || phoneNumberColumnIndex === undefined || promise"
-                           ng-click="importData($event)">יבא נתונים
-                </md-button>
-            </div>
+            <!-- Name column -->
+            <md-input-container class="flex margin-bottom-0">
+                <label>שם</label>
+                <md-select ng-model="nameColumnIndex"
+                           ng-change="storeData('nameColumnIndex', nameColumnIndex, $event)"
+                           ng-disabled="promises.nameColumnIndex"
+                           ng-class="{'selected-value': nameColumnIndex !== undefined}"
+                           placeholder="שם">
+                    <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                        {{header.display}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <!-- Guest count column -->
+            <md-input-container class="flex margin-bottom-0">
+                <label>מספר מוזמנים</label>
+                <md-select ng-model="guestCountColumnIndex"
+                           ng-change="storeData('guestCountColumnIndex', guestCountColumnIndex, $event)"
+                           ng-disabled="promises.guestCountColumnIndex"
+                           ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                           placeholder="מספר מוזמנים">
+                    <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                        {{header.display}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <!-- Phone number column -->
+            <md-input-container class="flex margin-bottom-0">
+                <label>מספר טלפון</label>
+                <md-select ng-model="phoneNumberColumnIndex"
+                           ng-change="storeData('phoneNumberColumnIndex', phoneNumberColumnIndex, $event)"
+                           ng-disabled="promises.phoneNumberColumnIndex"
+                           ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                           placeholder="מספר טלפון">
+                    <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                        {{header.display}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <!-- Approved guest count column -->
+            <md-input-container class="flex margin-bottom-0">
+                <label>אורחים שאישרו</label>
+                <md-select ng-model="approvedGuestCountColumnIndex"
+                           ng-change="storeData('approvedGuestCountColumnIndex', approvedGuestCountColumnIndex, $event)"
+                           ng-disabled="promises.approvedGuestCountColumnIndex"
+                           ng-class="{'selected-value': guestCountColumnIndex !== undefined}"
+                           placeholder="אורחים שאישרו">
+                    <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                        {{header.display}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <md-button class="md-raised md-accent some-margin"
+                       ng-disabled="nameColumnIndex === undefined || guestCountColumnIndex === undefined || phoneNumberColumnIndex === undefined || promise"
+                       ng-click="importData($event)">יבא נתונים
+            </md-button>
         </md-card>
         <!-- Guest Table -->
         <md-card>
@@ -332,6 +323,7 @@
                         ng-hide="options.rowSelection && selected.length">
                 <div class="md-toolbar-tools some-padding layout-row layout-align-space-between">
                     <div class="layout-row ">
+                        <span>תצוגה מקדימה של הנתונים</span>
                         <div class="layout-row">
                             <span class="some-padding animate-show-hide">מספר מוזמנים:</span>
                             <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>

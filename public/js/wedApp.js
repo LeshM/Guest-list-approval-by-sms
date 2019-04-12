@@ -155,7 +155,6 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                         });
 
                         $scope.guestListData = result.data;
-
                         [
                             'apiKey',
                             'apiSecret',
@@ -326,25 +325,25 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
         $scope.showMessages = function (guest, $event) {
             $mdDialog.show({
                 template: '<md-dialog class="messages" aria-label="הודעות">' +
-                '<md-toolbar>' +
-                '  <div class="md-toolbar-tools">' +
-                '    <h3>הודעות</h3>' +
-                '    <span data-flex></span>' +
-                '  </div>' +
-                '</md-toolbar>' +
-                '<md-dialog-content layout-padding layout="column">' +
-                '  <md-content layout-padding>' +
-                '       <md-card ng-repeat="message in guest.messages | orderBy:\'messageDate\'" class="message" ng-class="message.direction">' +
-                '           <span class="message-title">{{message.direction == \'from-guest\' ? guest.name : \'מערכת\'}}</span>' +
-                '           <span class="message-text" ng-bind-html="message.messageHtml"></span>' +
-                '           <span class="message-date">{{message.messageDate | date: \'dd/MM/yy | HH:mm:ss\'}}</span>' +
-                '       </md-card>' +
-                '  </md-content>' +
-                '</md-dialog-content>' +
-                '<md-dialog-actions>' +
-                '  <md-button ng-click="cancel()" class="md-primary md-raised">סגור</md-button>' +
-                '</md-dialog-actions>' +
-                '</md-dialog>',
+                    '<md-toolbar>' +
+                    '  <div class="md-toolbar-tools">' +
+                    '    <h3>הודעות</h3>' +
+                    '    <span data-flex></span>' +
+                    '  </div>' +
+                    '</md-toolbar>' +
+                    '<md-dialog-content layout-padding layout="column">' +
+                    '  <md-content layout-padding>' +
+                    '       <md-card ng-repeat="message in guest.messages | orderBy:\'messageDate\'" class="message" ng-class="message.direction">' +
+                    '           <span class="message-title">{{message.direction == \'from-guest\' ? guest.name : \'מערכת\'}}</span>' +
+                    '           <span class="message-text" ng-bind-html="message.messageHtml"></span>' +
+                    '           <span class="message-date">{{message.messageDate | date: \'dd/MM/yy | HH:mm:ss\'}}</span>' +
+                    '       </md-card>' +
+                    '  </md-content>' +
+                    '</md-dialog-content>' +
+                    '<md-dialog-actions>' +
+                    '  <md-button ng-click="cancel()" class="md-primary md-raised">סגור</md-button>' +
+                    '</md-dialog-actions>' +
+                    '</md-dialog>',
                 targetEvent: $event,
                 controller: function ($mdDialog, $scope) {
                     $scope.guest = angular.copy(guest);
