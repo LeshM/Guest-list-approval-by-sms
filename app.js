@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
 const request = require('request');
 
 mongoose.Promise = require('q').Promise;
-mongoose.connect(config.mongoDB, {useMongoClient: true});
+mongoose.connect(config.mongoDB, {useNewUrlParser: true});
 
 http.globalAgent.maxSockets = Infinity;
 

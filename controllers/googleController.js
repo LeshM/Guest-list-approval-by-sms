@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const google = require('googleapis');
-const sheets = google.sheets('v4');
-const googleAuth = require('google-auth-library');
+const {google} = require('googleapis');
+const {auth} = require('google-auth-library');
+const sheets = google.sheets({version: 'v4', auth});
 const googleSettings = require('../config/google-settings');
 const Q = require('q');
 const excelColumnName = require('excel-column-name');
@@ -13,15 +13,10 @@ const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 exports.authenticate = function (sheetId, authCode) {
     var defer = Q.defer();
-
-    var clientSecret = googleSettings.client_secret;
-    var clientId = googleSettings.client_id;
-    var redirectUrl = googleSettings.redirect_uris[0];
-    var auth = new googleAuth();
-    var authClient = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+    var authClient = new google.auth.OAuth2(googleSettings.client_id, googleSettings.client_secret, googleSettings.redirect_uris[0]);
 
     if (authCode) {
-        authClient.getToken(authCode, function (err, token) {
+        authClient.getToken(authCode, (err, token) => {
             if (err) {
                 defer.reject(err);
             } else {
@@ -62,7 +57,9 @@ exports.authenticateMiddleware = function (req, res, next) {
         })
         .catch(function (err) {
             if (err && err.status == 401) {
-                res.status(401).json({authUrl: err.authClient.generateAuthUrl({access_type: 'offline', scope: SCOPES})});
+                res.status(401).json({
+                    authUrl: err.authClient.generateAuthUrl({access_type: 'offline', scope: SCOPES})
+                });
             } else {
                 next(err);
             }
@@ -85,7 +82,7 @@ exports.getSpreadSheetData = function (authClient, sheetId, headerRow) {
         if (err) {
             defer.reject(err);
         } else {
-            var values = response.values;
+            var values = response && response.data && response.data.values;
             if (!values || !values.length) {
                 defer.reject('No data found.');
             } else {
