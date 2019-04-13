@@ -35,7 +35,7 @@ exports.updateGuestField = function (req, res, next) {
                 for (var i = sheet.guests.length - 1; i >= 0; i--) {
                     var guest = sheet.guests[i];
 
-                    if (guest[fieldName] == fieldValue) {
+                    if (fieldValue && guest[fieldName] == fieldValue) {
                         existingGuest = guest;
                         break;
                     }
@@ -110,6 +110,10 @@ exports.updateGuests = function (sheet, newGuests) {
             if (newGuest.approvedGuestCount) {
                 existingGuest.approvedGuestCount = newGuest.approvedGuestCount;
             }
+
+            if (newGuest.approvedKidCount) {
+                existingGuest.approvedKidCount = newGuest.approvedKidCount;
+            }
         } else {
             // Add new guest
             sheet.guests.push(newGuest);
@@ -134,7 +138,8 @@ exports.findSheetBySheetId = function (req, res, next) {
 };
 
 exports.findSheetByGuestPhone = function (guestPhone, smsSenderNumber) {
-    return Sheet.findOne({'guests.phoneNumber': guestPhone, smsSenderNumber: smsSenderNumber})
+    guestPhone = guestPhone.replace(/^0/, '');
+    return Sheet.findOne({'guests.phoneNumber': new RegExp('0?' + guestPhone), smsSenderNumber: smsSenderNumber})
         .exec();
 };
 

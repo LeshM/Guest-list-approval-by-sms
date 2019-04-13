@@ -38,6 +38,7 @@ var SheetSchema = new Schema({
         phoneNumber: String,
         guestCount: Number,
         sentMessageCount: Number,
+        approvedKidCount: Number,
         approvedGuestCount: Number,
         gift: {
             giftType: {type: String},

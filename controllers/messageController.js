@@ -43,7 +43,7 @@ exports.sendMessageToGuest = function (phone, message, smsSenderNumber, isOnlyTo
     sheetCont.findSheetByGuestPhone(phone, smsSenderNumber)
         .then(function (sheet) {
             if (!sheet) {
-                deferred.reject({status: 403, message: 'phone does not belong to any guest ' + phone});
+                deferred.reject({status: 403, message: 'לא נמצא אורח עם הטלפון: ' + phone});
             } else {
                 var isGuestFound = false;
 
@@ -97,82 +97,88 @@ exports.sendMessage = function (req, res, next) {
         });
 };
 
-exports.receiveMessage = function (req, res, next) {
+exports.receiveMessage = async function (req, res, next) {
     var messageId = req.query.messageId || req.body.messageId;
     var phone = (req.query.msisdn || req.body.msisdn || '').replace(config.defaultCountryCode, '');
     var messageText = req.query.text || req.body.text;
     var smsSenderNumber = req.query.to || req.body.to;
 
-    sheetCont.findSheetByGuestPhone(phone, smsSenderNumber)
-        .then(function (sheet) {
-            if (!sheet) {
-                next('no sheet doc');
-            } else {
-                for (var g = 0; g < sheet.guests.length; g++) {
-                    var guest = sheet.guests[g];
+    try {
+        var sheet = await sheetCont.findSheetByGuestPhone(phone, smsSenderNumber)
 
-                    if (guest.phoneNumber) {
-                        guest.phoneNumber = utils.sanitizePhoneNumber(guest.phoneNumber);
+        if (!sheet) {
+            next('no sheet doc');
+        } else {
+            res.status(200).end();
 
-                        // This is the phone's row
-                        if (new RegExp(phone).test(guest.phoneNumber)) {
-                            guest.messages.fromGuest.push({
-                                messageId: messageId,
-                                messageText: messageText
+            for (var g = 0; g < sheet.guests.length; g++) {
+                var guest = sheet.guests[g];
+
+                if (guest.phoneNumber) {
+                    guest.phoneNumber = utils.sanitizePhoneNumber(guest.phoneNumber);
+
+                    // This is the phone's row
+                    if (new RegExp(phone).test(guest.phoneNumber)) {
+                        guest.messages.fromGuest.push({
+                            messageId: messageId,
+                            messageText: messageText
+                        });
+
+                        var isSendApprovalMessage = false;
+                        var approvedCount = guest.approvedGuestCount || 0;
+                        var approvedKidCount = guest.approvedKidCount || 0;
+                        var numbers = /(\d\s*[א-ת]*)\s*[א-ת]?\s*-?\s*(\d\s*[א-ת]*)?/g.exec(messageText);
+                        if (numbers && numbers.length) {
+                            // Remove the input result
+                            numbers.shift();
+                        }
+
+                        if (numbers && numbers.length > 1) {
+                            numbers.forEach(numberRegex => {
+                                if (/ילד/.test(numberRegex)) {
+                                    approvedKidCount = parseInt(numberRegex);
+                                } else {
+                                    approvedCount = parseInt(numberRegex);
+                                }
                             });
 
-                            var approvedCount = guest.approvedGuestCount || 0;
-                            var numbers = /\d+/g.exec(messageText);
-                            var isSendApprovalMessage = false;
-
-                            if (numbers && numbers.length == 1) {
-                                approvedCount = Number(numbers[0]);
-
-                                isSendApprovalMessage = true;
-
-                                if (approvedCount < 0 || approvedCount > 100) {
-                                    approvedCount = guest.guestCount;
-                                    exports.sendMessageToGuest(sheet, guest, 'זה בסדר, כבר עשינו בדיקות 😈', smsSenderNumber);
-                                }
-                            } else if (/צמחוני/.test(messageText)) {
-                                guest.mealType = 'צמחונית';
-                            } else if (/טבעוני/.test(messageText)) {
-                                guest.mealType = 'טבעונית';
-                            } else {
-                                approvedCount = undefined;
-                            }
-
-                            if (!isNaN(approvedCount)) {
-                                guest.approvedGuestCount = approvedCount;
-                            }
-
-                            if (isSendApprovalMessage) {
-                                sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber, false, true)
-                                    .then(function () {
-                                        sheet.save()
-                                            .then(function () {
-                                                res.status(200).end();
-                                            })
-                                            .catch(next);
-                                    })
-                                    .catch(next);
-                            } else {
-                                sheet.save()
-                                    .then(function () {
-                                        res.status(200).end();
-                                    })
-                                    .catch(next)
-                            }
-
-                            return;
+                            isSendApprovalMessage = true;
+                        } else if (/צמחוני/.test(messageText)) {
+                            guest.mealType = 'צמחונית';
+                        } else if (/טבעוני/.test(messageText)) {
+                            guest.mealType = 'טבעונית';
+                        } else {
+                            approvedCount = undefined;
                         }
+
+                        if (!isNaN(approvedCount)) {
+                            guest.approvedGuestCount = approvedCount;
+                        }
+
+                        if (!isNaN(approvedKidCount)) {
+                            guest.approvedKidCount = approvedKidCount;
+                        }
+
+                        try {
+                            if (isSendApprovalMessage) {
+                                await sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber, false, true)
+                            }
+
+                            await sheet.save();
+                        } catch (e) {
+                            next(e);
+                        }
+
+                        return;
                     }
                 }
-
-                next('No guest found for phone: ' + phone);
             }
-        })
-        .catch(next);
+
+            next('לא נמצא אורח עם הטלפון: ' + phone);
+        }
+    } catch (e) {
+        next(e);
+    }
 };
 
 exports.confirmMessageDelivery = function (req, res) {

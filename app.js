@@ -43,23 +43,28 @@ router.post('/read-data', googleController.sanitizeSheetUrl, googleController.au
         });
 });
 
-router.post('/import-data', googleController.sanitizeSheetUrl, googleController.authenticateMiddleware, sheetController.findSheetBySheetId, function (req, res, next) {
-    googleController.getSpreadSheetData(req.authClient, req.sheetId, req.body.headerRow)
-        .then(function (sheetData) {
-            guestController.importGuests(req.sheetDoc, sheetData, req.body.nameColumnIndex, req.body.phoneNumberColumnIndex, req.body.guestCountColumnIndex, req.body.approvedGuestCountColumnIndex)
-                .then(function (sheet) {
-                    sheet = sheet.toObject();
+router.post('/import-data', googleController.sanitizeSheetUrl, googleController.authenticateMiddleware, sheetController.findSheetBySheetId, async function (req, res, next) {
+    try {
+        var sheetData = await googleController.getSpreadSheetData(req.authClient, req.sheetId, req.body.headerRow);
+        var sheet = await guestController.importGuests(
+            req.sheetDoc,
+            sheetData,
+            req.body.nameColumnIndex,
+            req.body.phoneNumberColumnIndex,
+            req.body.guestCountColumnIndex,
+            req.body.approvedGuestCountColumnIndex,
+            req.body.approvedKidCountColumnIndex);
 
-                    sheet.guests.forEach(function (guest) {
-                        guest.messages = guestController.mergeGuestMessages(guest);
-                        utils.flattenObjectField(guest, 'gift');
-                    });
+        sheet = sheet.toObject();
+        sheet.guests.forEach(function (guest) {
+            guest.messages = guestController.mergeGuestMessages(guest);
+            utils.flattenObjectField(guest, 'gift');
+        });
 
-                    res.status(200).json(sheet);
-                })
-                .catch(next);
-        })
-        .catch(next);
+        res.status(200).json(sheet);
+    } catch (e) {
+        next(e);
+    }
 });
 
 router.put('/field/:fieldName/:fieldValue?', googleController.sanitizeSheetUrl, sheetController.updateColumnMiddleware, function (req, res) {

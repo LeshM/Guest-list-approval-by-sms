@@ -28,7 +28,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
         $scope.rowsPage = 10;
         $scope.rowsToShow = $scope.rowsPage;
         $scope.defaultMessageTypes = {
-            invite: 'היי :GUEST:! 😎 אנו מזמינים אותך לחתונה של :COUPLE: ביום :EVENT_DATE: ב":VENUE:". נודה לך על אישור הגעתך בהשבה להודעה זו עם מספר האורחים שיגיעו (0 אם לא יגיעו). נשמח לראותך 🤘',
+            invite: 'היי :GUEST:! 😎 אנו מזמינים אותך לחתונה של :COUPLE: ביום :EVENT_DATE: ב":VENUE:". נודה לך על אישור הגעתך בהשבה להודעה זו עם מספר האורחים והילדים שיגיעו: "4 מבוגרים ו2 ילדים" או "2" או "0" אם לא תגיעו. נשמח לראותך 🤘',
             approval: 'תודה רבה! 😍 בכל שינוי, ניתן לשלוח הודעה נוספת למספר זה. במידה ותרצו מנה צמחונית או טבעונית אנא שלחו "צמחונית" / "טבעונית" בכדי שנוכל להיערך מראש :)',
             reminder: 'בוקר טובבבב :GUEST:! מתרגשים לקראת החתונה! 🎉 מזכירים שהיא ב:EVENT_DATE: להוראות הגעה ניתן ללחוץ על הקישור הבא: :VENUE_LOCATION_URL:',
             reminderNoUrl: 'בוקר טובבבב :GUEST:! מתרגשים לקראת החתונה! 🎉 מזכירים שהיא ב:EVENT_DATE: ב:VENUE_LOCATION:',
@@ -170,6 +170,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                             'phoneNumberColumnIndex',
                             'messageSentColumnIndex',
                             'approvedGuestCountColumnIndex',
+                            'approvedKidCountColumnIndex',
                             'messagesColumnIndex',
                             'giftColumnIndex'
                         ]
@@ -204,7 +205,8 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                     nameColumnIndex: $scope.nameColumnIndex,
                     phoneNumberColumnIndex: $scope.phoneNumberColumnIndex,
                     guestCountColumnIndex: $scope.guestCountColumnIndex,
-                    approvedGuestCountColumnIndex: $scope.approvedGuestCountColumnIndex
+                    approvedGuestCountColumnIndex: $scope.approvedGuestCountColumnIndex,
+                    approvedKidCountColumnIndex: $scope.approvedKidCountColumnIndex,
                 })
                     .then(function (result) {
                         $scope.sheet = result.data;
@@ -215,6 +217,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                                 {key: 'guestCount', display: 'מוזמנים', type: 'number'},
                                 {key: 'sentMessageCount', display: 'הודעות שנשלחו לאורח', type: 'text', isReadOnly: true},
                                 {key: 'approvedGuestCount', display: 'אורחים שמגיעים', type: 'number'},
+                                {key: 'approvedKidCount', display: 'ילדים שמגיעים', type: 'number'},
                                 {key: 'mealType', display: 'סוג ארוחה', options: 'בשרית צמחונית טבעונית'.split(' ')},
                                 {key: 'gift.giftType', display: 'מתנה - סוג', options: 'מזומן המחאה פיזית'.split(' ')},
                                 {key: 'gift.giftAmount', display: 'מתנה - סכום', type: 'number'},
@@ -386,6 +389,21 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
             return totalApproved;
         };
 
+        $scope.getTotalApprovedKidCount = function () {
+            var totalApproved = 0;
+
+            if ($scope.guestListData) {
+                angular.forEach($scope.guestListData.rows, function (row) {
+                    var data = row.approvedKidCount || 0;
+                    if (!isNaN(data)) {
+                        totalApproved += Number(data);
+                    }
+                });
+            }
+
+            return totalApproved;
+        };
+
         $scope.getTotalMealTypes = function (mealType) {
             var totalOfMealType = 0;
 
@@ -463,6 +481,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                     phoneNumber: row.phoneNumber,
                     guestCount: row.guestCount,
                     sentMessageCount: row.sentMessageCount,
+                    approvedKidCount: row.approvedKidCount,
                     approvedGuestCount: row.approvedGuestCount,
                     mealType: row.mealType,
                     'gift.giftType': row['gift.giftType'],

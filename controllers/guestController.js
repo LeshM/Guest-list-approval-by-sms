@@ -1,17 +1,14 @@
-const Q = require('q');
 const utils = require('../utils');
 const sheetController = require('./sheetContoller');
 
-exports.importGuests = function (sheetDoc, sheetData, nameColumnIndex, phoneNumberColumnIndex, guestCountColumnIndex, approvedGuestCountColumnIndex) {
-    var deferred = Q.defer();
-
-    if (!sheetDoc || !sheetData) {
-        deferred.reject();
-    } else {
-        function handleSheet(sheet) {
+exports.importGuests = function (sheetDoc, sheetData, nameColumnIndex, phoneNumberColumnIndex, guestCountColumnIndex, approvedGuestCountColumnIndex, approvedKidCountColumnIndex) {
+    return new Promise((resolve, reject) => {
+        if (!sheetDoc || !sheetData) {
+            reject('no sheet');
+        } else {
             var guests = [];
 
-            sheet.rows.forEach(function (row) {
+            sheetData.rows.forEach(function (row) {
                 var phone = row[phoneNumberColumnIndex];
 
                 // Number with no country code and no leading 0 ~ Number with country code, '+' sign and a leading 0
@@ -23,25 +20,22 @@ exports.importGuests = function (sheetDoc, sheetData, nameColumnIndex, phoneNumb
                             name: row[nameColumnIndex],
                             phoneNumber: phone,
                             guestCount: Number(row[guestCountColumnIndex] || 0),
-                            approvedGuestCount: Number(row[approvedGuestCountColumnIndex] || 0)
+                            approvedKidCount: Number(row[approvedKidCountColumnIndex] || 0),
+                            approvedGuestCount: Number(row[approvedGuestCountColumnIndex] || 0),
                         });
                     }
                 }
             });
 
             if (!guests.length) {
-                deferred.reject('לא נמצאו מספרי טלפון של אורחים');
+                reject('לא נמצאו מספרי טלפון של אורחים');
             } else {
                 sheetController.updateGuests(sheetDoc, guests)
-                    .then(deferred.resolve)
-                    .catch(deferred.reject);
+                    .then(resolve)
+                    .catch(reject);
             }
         }
-
-        handleSheet(sheetData);
-    }
-
-    return deferred.promise;
+    });
 };
 
 exports.mergeGuestMessages = function (guest) {

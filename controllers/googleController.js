@@ -56,7 +56,7 @@ exports.authenticateMiddleware = function (req, res, next) {
             next();
         })
         .catch(function (err) {
-            if (err && err.status == 401) {
+            if (err && (err.status == 401 || err.code == 400)) {
                 res.status(401).json({
                     authUrl: err.authClient.generateAuthUrl({access_type: 'offline', scope: SCOPES})
                 });

@@ -31,7 +31,7 @@
 </head>
 <body ng-controller="messageController">
 <md-content style="height: 100%">
-    <md-content class="some-padding padding-bottom-0 layout-column">
+    <md-content class="padding-05em padding-bottom-0 layout-column">
         <!-- File url card -->
         <md-card class="flex-100 layout-row layout-align-center-center layout-padding">
             <md-toolbar class="md-table-toolbar md-default flex no-wrap">
@@ -62,7 +62,7 @@
                        type="number"
                        min="0"/>
             </md-input-container>
-            <md-button ng-disabled="isShowCodeInput || promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">טען קובץ</md-button>
+            <md-button ng-disabled="isShowCodeInput || promise" class="md-raised md-primary margin-2em" ng-click="loadList($event)">טען קובץ</md-button>
         </md-card>
         <!-- At the moment I just use my own API key & secret on the server so the users won't have to bother with Nexmo -->
         <md-card class="flex-100 layout-row animate-show-hide layout-align-center-center layout-padding ltr" ng-show="guestListData && false">
@@ -178,13 +178,15 @@
             <md-input-container class="flex">
                 <input ng-disabled="promise" ng-model="authCode" aria-label="auth code" placeholder="קוד אישור" dir="auto"/>
             </md-input-container>
-            <md-button ng-disabled="promise" class="md-raised md-primary some-margin" ng-click="loadList($event)">שלח קוד אישור</md-button>
+            <md-button ng-disabled="promise" class="md-raised md-primary margin-2em" ng-click="loadList($event)">שלח קוד אישור</md-button>
         </md-card>
     </md-content>
-    <md-content class="some-padding padding-top-0 animate-show-hide" ng-show="guestListData">
-        <md-card class="animate-show-hide" ng-show="sheet.guests"
-                 ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
-            <div class="layout-padding">
+    <md-content class="padding-05em padding-top-0 animate-show-hide" ng-show="guestListData">
+        <md-card class="animate-show-hide" ng-show="sheet.guests" ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
+            <md-toolbar class="md-table-toolbar md-default padding-0">
+                <div class="md-toolbar-tools"><span>שליחת הודעות</span></div>
+            </md-toolbar>
+            <div class="layout-column layout-padding padding-1em">
                 <md-radio-group ng-model="templateOrManual" ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
                     <md-radio-button ng-value="'template'" aria-label="הודעה מוכנה מראש">הודעה מוכנה מראש</md-radio-button>
                     <md-radio-button ng-value="'manual'" aria-label="הודעה ידנית">הודעה ידנית</md-radio-button>
@@ -244,7 +246,7 @@
                             שנתנו מתנה
                         </md-checkbox>
                     </div>
-                    <md-button class="md-raised md-accent md-fab some-margin send-all-btn" ng-click="sendAllSMS($event)"
+                    <md-button class="md-raised md-accent md-fab margin-2em send-all-btn" ng-click="sendAllSMS($event)"
                                ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
                         <div>התחל שליחת</div>
                         <div>הודעות SMS</div>
@@ -253,8 +255,7 @@
                 </div>
                 <span ng-show="smsRequestsSent || smsResponsesGot">{{smsRequestsSent}} / {{smsResponsesGot}}</span>
             </div>
-            <md-progress-linear md-mode="determinate"
-                                ng-value="smsResponsesGot / smsRequestsSent * 100"></md-progress-linear>
+            <md-progress-linear md-mode="determinate" ng-value="smsResponsesGot / smsRequestsSent * 100"></md-progress-linear>
         </md-card>
         <md-card class="flex-100 layout-row animate-show-hide layout-align-center layout-padding" ng-hide="sheet">
             <md-toolbar class="md-table-toolbar md-default flex-15 padding-0 no-wrap animate-show-hide" ng-hide="options.rowSelection && selected.length">
@@ -312,7 +313,20 @@
                     </md-option>
                 </md-select>
             </md-input-container>
-            <md-button class="md-raised md-accent some-margin"
+            <!-- Approved kid count column -->
+            <md-input-container class="flex margin-bottom-0">
+                <label>ילדים</label>
+                <md-select ng-model="approvedKidCountColumnIndex"
+                           ng-change="storeData('approvedKidCountColumnIndex', approvedKidCountColumnIndex, $event)"
+                           ng-disabled="promises.approvedKidCountColumnIndex"
+                           ng-class="{'selected-value': kidCountColumnIndex !== undefined}"
+                           placeholder="ילדים">
+                    <md-option ng-value="header.key" ng-repeat="header in guestListData.headers">
+                        {{header.display}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <md-button class="md-raised md-accent margin-2em"
                        ng-disabled="nameColumnIndex === undefined || guestCountColumnIndex === undefined || phoneNumberColumnIndex === undefined || promise"
                        ng-click="importData($event)">יבא נתונים
             </md-button>
@@ -322,20 +336,20 @@
             <md-toolbar class="md-table-toolbar md-default animate-show-hide" ng-hide="options.rowSelection && selected.length">
                 <div class="layout-row layout-align-space-between md-toolbar-tools">
                     <div class="layout-row ">
-                        <span class="some-padding animate-show-hide">מספר מוזמנים:</span>
-                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>
-                        <div class="some-padding animate-show-hide">/</div>
-                        <span class="some-padding animate-show-hide">מספר מגיעים:</span>
-                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalApprovedCount()}}</span>
-                        <div class="some-padding animate-show-hide">=</div>
-                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">%{{getTotalApprovedCount() / getTotalGuestCount() * 100}}</span>
+                        <span class="padding-05em animate-show-hide">מספר מוזמנים:</span>
+                        <span class="padding-05em animate-show-hide" ng-show="guestListData.rows.length">{{getTotalGuestCount()}}</span>
+                        <div class="padding-05em animate-show-hide">/</div>
+                        <span class="padding-05em animate-show-hide">מספר מגיעים:</span>
+                        <span class="padding-05em animate-show-hide" ng-show="guestListData.rows.length">{{getTotalApprovedCount()}}</span>
+                        <div class="padding-05em animate-show-hide">=</div>
+                        <span class="padding-05em animate-show-hide" ng-show="guestListData.rows.length">%{{getTotalApprovedCount() / getTotalGuestCount() * 100 | number: 0}}</span>
                     </div>
                     <div class="layout-row">
-                        <span class="some-padding animate-show-hide">מנות צמחוניות:</span>
-                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('צמחונית')}}</span>
-                        <div class="some-padding animate-show-hide">/</div>
-                        <span class="some-padding animate-show-hide">מנות טבעוניות:</span>
-                        <span class="some-padding animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
+                        <span class="padding-05em animate-show-hide">מנות טבעוניות:</span>
+                        <span class="padding-05em animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
+                        <div class="padding-05em animate-show-hide">|</div>
+                        <span class="padding-05em animate-show-hide">מנות טבעוניות:</span>
+                        <span class="padding-05em animate-show-hide" ng-show="guestListData.rows.length">{{getTotalMealTypes('טבעונית')}}</span>
                     </div>
                 </div>
             </md-toolbar>
@@ -382,14 +396,16 @@
                                        class="md-raised md-accent"
                                        ng-click="showMessages(guest, $event)"
                                        ng-show="sheet"
-                                       ng-disabled="!guest.messages || !guest.messages.length">הצג
+                                       ng-disabled="!guest.messages || !guest.messages.length">
+                                <span>הצג הודעות</span>
                             </md-button>
                         </td>
                         <td md-cell class="no-wrap">
                             <md-button class="md-raised md-accent animate-show-hide"
                                        ng-click="sendSingleSMS(guest, $event)"
                                        ng-show="sheet"
-                                       ng-disabled="guest.isDisabled || !guest.phoneNumber || singleSmsPromise || (header.key != 'phoneNumber' && !guest._id)">שלח
+                                       ng-disabled="guest.isDisabled || !guest.phoneNumber || singleSmsPromise || (header.key != 'phoneNumber' && !guest._id)">
+                                <span>שלח הודעה</span>
                             </md-button>
                             <md-button class="md-raised md-accent md-icon-button animate-show-hide"
                                        ng-click="disableGuest(guest, $index, $event)"
@@ -417,12 +433,12 @@
             </md-table-container>
 
             <div class="layout-row layout-align-space-between">
-                <md-button class="md-raised md-accent md-fab some-margin" ng-if="sheet" ng-click="addGuest()" ng-disabled="newGuest">
+                <md-button class="md-raised md-accent md-fab margin-2em" ng-if="sheet" ng-click="addGuest()" ng-disabled="newGuest">
                     <md-tooltip md-direction="left">הוסף אורח חדש</md-tooltip>
                     <md-icon>add</md-icon>
                 </md-button>
 
-                <md-button class="md-raised md-accent md-fab some-margin"
+                <md-button class="md-raised md-accent md-fab margin-2em"
                            ng-if="sheet"
                            ng-csv="getCsvRows(guestListData.rows)"
                            csv-header="getCsvHeaders(guestListData.headers)"

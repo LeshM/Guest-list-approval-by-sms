@@ -3,31 +3,35 @@
 }
 
 .padding-0 {
-    padding: 0;
+    padding: 0 !important;
 }
 
-.some-padding {
+.padding-05em {
     padding: .5em;
 }
 
+.padding-1em {
+    padding: 1em;
+}
+
 .padding-top-0 {
-    padding-top: 0;
+    padding-top: 0 !important;
 }
 
 .padding-bottom-0 {
-    padding-bottom: 0;
+    padding-bottom: 0 !important;
 }
 
-.some-margin {
+.margin-2em {
     margin: 2em;
 }
 
 .margin-top-0 {
-    margin-top: 0;
+    margin-top: 0 !important;
 }
 
 .margin-bottom-0 {
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
 }
 
 table.md-table td.md-cell, table.md-table th.md-column {
@@ -167,6 +171,7 @@ html[dir=rtl] .ltr md-input-container label {
 md-tooltip {
     font-size: 1em;
 }
+
 md-tooltip .md-content {
     padding: .2em .4em;
 }
