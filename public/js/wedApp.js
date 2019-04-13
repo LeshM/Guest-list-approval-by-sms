@@ -99,9 +99,9 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                     guestListUrl: $scope.guestListUrl,
                     fieldValue: fieldValue
                 }, {timeout: $scope.promises[fieldName]})
-                    .success(function (data) {
+                    .then(function (response) {
                         if ($scope.newGuest) {
-                            $scope.newGuest._id = data;
+                            $scope.newGuest._id = response.data;
                             delete $scope.newGuest;
 
                             showToast('האורח החדש נשמר בהצלחה!');
@@ -139,6 +139,13 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
             $mdToast.show($mdToast.simple().content(message).position('bottom right').hideDelay(2000));
         }
 
+        function getBalance() {
+            $http.post('/balance', {guestListUrl: $scope.guestListUrl})
+                .then(function (result) {
+                    $scope.remainingBalance = result.data.remainingBalance;
+                });
+        }
+
         $scope.loadList = function ($event) {
             if (!$scope.guestListUrl) {
                 alertConfirm.alert('שגיאה', 'לא הוזן קישור לרשימת מוזמנים!', $event);
@@ -150,6 +157,8 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                     authCode: $scope.authCode
                 })
                     .then(function (result) {
+                        $scope.isShowCodeInput = false;
+
                         angular.forEach(result.data.headers, function (header) {
                             header.isReadOnly = true;
                         });
@@ -179,6 +188,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                             });
 
                         showToast('רשימת המוזמנים נטענה!');
+                        getBalance();
                     })
                     .catch(function (err) {
                         if (err.status == 401) {
@@ -200,7 +210,6 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
             } else {
                 $scope.promise = $http.post('/import-data/', {
                     guestListUrl: $scope.guestListUrl,
-                    authCode: $scope.authCode,
                     headerRow: $scope.headerRow,
                     nameColumnIndex: $scope.nameColumnIndex,
                     phoneNumberColumnIndex: $scope.phoneNumberColumnIndex,
@@ -258,7 +267,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                 isOnlyToGuestsWithNoAnswer: $scope.isOnlyToGuestsWithNoAnswer,
                 isOnlyToGuestsWhoBroughtGifts: $scope.isOnlyToGuestsWhoBroughtGifts
             })
-                .success(function () {
+                .then(function (response) {
                     guest.sentMessageCount = (guest.sentMessageCount || 0) + 1;
                     guest.messages.push({
                         messageId: Date.now(),
@@ -266,8 +275,12 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                         messageDate: new Date().toISOString(),
                         direction: 'to-guest'
                     });
+
+                    if (response.data.remainingBalance !== undefined) {
+                        $scope.remainingBalance = response.data.remainingBalance;
+                    }
                 })
-                .error(function (err) {
+                .catch(function (err) {
                     console.error(err);
                     alertConfirm.alert('שגיאה', err && (err.data || err.message || err) || 'שגיאה בשליחת הודעה!', $event);
                 });
@@ -499,4 +512,9 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
                 }
             });
         };
+
+        $http.get('https://api.exchangeratesapi.io/latest?base=EUR&symbols=ILS')
+            .then(function (result) {
+                $scope.eurToIls = result.data.rates.ILS;
+            });
     }]);

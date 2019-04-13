@@ -184,7 +184,13 @@
     <md-content class="padding-05em padding-top-0 animate-show-hide" ng-show="guestListData">
         <md-card class="animate-show-hide" ng-show="sheet.guests" ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
             <md-toolbar class="md-table-toolbar md-default padding-0">
-                <div class="md-toolbar-tools"><span>שליחת הודעות</span></div>
+                <div class="md-toolbar-tools">
+                    <span>שליחת הודעות</span>
+                    <span class="animate-show-hide padding-05em" ng-show="remainingBalance !== undefined">
+                        <span> - שארית תקציב: </span>
+                        <span>₪{{remainingBalance * (eurToIls || 4) | number: 2}}</span>
+                    </span>
+                </div>
             </md-toolbar>
             <div class="layout-column layout-padding padding-1em">
                 <md-radio-group ng-model="templateOrManual" ng-disabled="!guestListData.rows.length || smsRequestsSent != smsResponsesGot">
@@ -328,7 +334,8 @@
             </md-input-container>
             <md-button class="md-raised md-accent margin-2em"
                        ng-disabled="nameColumnIndex === undefined || guestCountColumnIndex === undefined || phoneNumberColumnIndex === undefined || promise"
-                       ng-click="importData($event)">יבא נתונים
+                       ng-click="importData($event)">
+                <span>יבא נתונים</span>
             </md-button>
         </md-card>
         <!-- Guest Table -->

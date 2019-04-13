@@ -28,7 +28,7 @@ function sendMessageToGuestAndUpdateSheet(sheet, guest, message, smsSenderNumber
                     messageId: response.messageId,
                     messageText: message
                 })
-                    .then(deferred.resolve)
+                    .then(() => deferred.resolve(response))
                     .catch(deferred.reject);
             })
             .catch(deferred.reject);
@@ -75,7 +75,7 @@ exports.sendMessageToGuest = function (phone, message, smsSenderNumber, isOnlyTo
     return deferred.promise;
 };
 
-exports.sendMessage = function (req, res, next) {
+exports.sendMessage = async function (req, res, next) {
     var phone = utils.sanitizePhoneNumber(req.params.to);
     var message = req.query.message || req.body.message;
     var smsSenderNumber = req.query.smsSenderNumber || req.body.smsSenderNumber;
@@ -84,17 +84,22 @@ exports.sendMessage = function (req, res, next) {
     var isOnlyToGuestsWithNoAnswer = req.query.isOnlyToGuestsWithNoAnswer || req.body.isOnlyToGuestsWithNoAnswer;
     var isOnlyToGuestsWhoBroughtGifts = req.query.isOnlyToGuestsWhoBroughtGifts || req.body.isOnlyToGuestsWhoBroughtGifts;
 
-    messageController.sendMessageToGuest(phone, message, smsSenderNumber, isOnlyToUnsentNumbers, isOnlyToApprovedGuests, isOnlyToGuestsWithNoAnswer, isOnlyToGuestsWhoBroughtGifts)
-        .then(function () {
-            res.status(200).end();
-        })
-        .catch(function (err) {
-            if (err && err.status) {
-                res.status(err.status).json(err);
-            } else {
-                next(err);
-            }
-        });
+    try {
+        var response = await messageController.sendMessageToGuest(phone, message, smsSenderNumber, isOnlyToUnsentNumbers, isOnlyToApprovedGuests, isOnlyToGuestsWithNoAnswer, isOnlyToGuestsWhoBroughtGifts);
+        var remainingBalance;
+        
+        if (response && response.messages && response.messages.length && response.messages[0]) {
+            remainingBalance = response.messages[0]['remaining-balance'];
+        }
+        
+        res.status(200).json({remainingBalance: remainingBalance});
+    } catch (e) {
+        if (e && e.status) {
+            res.status(e.status).json(e);
+        } else {
+            next(e);
+        }
+    }
 };
 
 exports.receiveMessage = async function (req, res, next) {
@@ -161,7 +166,7 @@ exports.receiveMessage = async function (req, res, next) {
 
                         try {
                             if (isSendApprovalMessage) {
-                                await sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber, false, true)
+                                await sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber, false, true);
                             }
 
                             await sheet.save();
@@ -186,3 +191,5 @@ exports.confirmMessageDelivery = function (req, res) {
 
     res.status(200).end();
 };
+
+exports.getBalance = sender.getBalance;

@@ -11,54 +11,50 @@ const moment = require('moment');
 // If modifying these scopes, delete your previously saved credentials
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
-exports.authenticate = function (sheetId, authCode) {
-    var defer = Q.defer();
-    var authClient = new google.auth.OAuth2(googleSettings.client_id, googleSettings.client_secret, googleSettings.redirect_uris[0]);
+function authenticateSheet(req) {
+    return new Promise((resolve, reject) => {
+        var sheetId = req.sheetId;
+        var authCode = req.authCode;
+        req.authClient = new google.auth.OAuth2(googleSettings.client_id, googleSettings.client_secret, googleSettings.redirect_uris[0]);
 
-    if (authCode) {
-        authClient.getToken(authCode, (err, token) => {
-            if (err) {
-                defer.reject(err);
-            } else {
-                authClient.credentials = token;
-
-                Sheet.findOneAndUpdate({sheetId: sheetId}, {$set: {token: token}}, {upsert: true})
-                    .then(function () {
-                        defer.resolve(authClient);
-                    })
-                    .catch(defer.reject);
-            }
-        });
-    } else {
-        Sheet.findOne({sheetId: sheetId, token: {$exists: true}})
-            .lean()
-            .exec()
-            .then(function (sheet) {
-                if (!sheet || moment().isAfter(sheet.token.expiry_date)) {
-                    defer.reject({status: 401, authClient: authClient});
+        if (authCode) {
+            req.authClient.getToken(authCode, (err, token) => {
+                if (err) {
+                    reject(err);
                 } else {
-                    authClient.credentials = sheet.token;
-                    defer.resolve(authClient);
-                }
-            })
-            .catch(defer.reject);
-    }
+                    req.authClient.credentials = token;
 
-    return defer.promise;
-};
+                    Sheet.findOneAndUpdate({sheetId: sheetId}, {$set: {token: token}}, {upsert: true})
+                        .then(resolve)
+                        .catch(reject);
+                }
+            });
+        } else {
+            Sheet.findOne({sheetId: sheetId, token: {$exists: true}})
+                .lean()
+                .exec()
+                .then(function (sheet) {
+                    if (!sheet || moment().isAfter(sheet.token.expiry_date)) {
+                        reject({status: 401, message: 'expired'});
+                    } else {
+                        req.authClient.credentials = sheet.token;
+                        resolve();
+                    }
+                })
+                .catch(reject);
+        }
+    });
+}
 
 exports.authenticateMiddleware = function (req, res, next) {
     req.authCode = req.body.authCode;
 
-    exports.authenticate(req.sheetId, req.authCode)
-        .then(function (authClient) {
-            req.authClient = authClient;
-            next();
-        })
+    authenticateSheet(req)
+        .then(() => next())
         .catch(function (err) {
             if (err && (err.status == 401 || err.code == 400)) {
                 res.status(401).json({
-                    authUrl: err.authClient.generateAuthUrl({access_type: 'offline', scope: SCOPES})
+                    authUrl: req.authClient.generateAuthUrl({access_type: 'offline', scope: SCOPES})
                 });
             } else {
                 next(err);

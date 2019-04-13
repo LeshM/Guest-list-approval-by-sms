@@ -1,22 +1,29 @@
 const config = require('../config');
 const Nexmo = require('simple-nexmo');
-const Q = require('q');
 const phone = require('phone');
+const NEXMO_KEY = process.env.NEXMO_KEY;
+const NEXMO_SECRET = process.env.NEXMO_SECRET;
 
 var queue = [];
 var promise = null;
-var startQueue = function () {
+
+function createClient(apiKey, apiSecret) {
+    // TODO: replace these lines in order to use the client keys instead of the system keys
+    // return new Nexmo({apiKey: apiKey, apiSecret: apiSecret});
+    return new Nexmo({apiKey: NEXMO_KEY, apiSecret: NEXMO_SECRET});
+}
+
+function startQueue() {
     if (!promise) {
         promise = setInterval(function () {
             var queueItem = queue.pop();
 
-            new Nexmo({apiKey: queueItem.apiKey, apiSecret: queueItem.apiSecret}).sendSMSMessage({
+            createClient(queueItem.apiKey, queueItem.apiSecret).sendSMSMessage({
                 from: queueItem.smsSenderNumber,
                 to: queueItem.phoneNumber,
                 text: queueItem.sms,
                 type: 'unicode'
             }, queueItem.callback);
-
 
             if (!queue.length) {
                 clearInterval(promise);
@@ -24,30 +31,40 @@ var startQueue = function () {
             }
         }, 2500);
     }
-};
+}
 
 exports.sendSMSMessage = function (apiKey, apiSecret, smsSenderNumber, phoneNumber, sms) {
-    var defer = Q.defer();
+    return new Promise((resolve, reject) => {
+        phoneNumber = phone(phoneNumber, config.defaultCountry);
 
-    phoneNumber = phone(phoneNumber, config.defaultCountry);
-
-    queue.push({
-        apiKey: apiKey,
-        apiSecret: apiSecret,
-        smsSenderNumber: smsSenderNumber,
-        phoneNumber: phoneNumber,
-        sms: sms,
-        callback: function (err, response) {
-            if (err) {
-                defer.reject(err.message || err);
-            } else {
-                console.log(response);
-                defer.resolve(response);
+        queue.push({
+            apiKey: apiKey,
+            apiSecret: apiSecret,
+            smsSenderNumber: smsSenderNumber,
+            phoneNumber: phoneNumber,
+            sms: sms,
+            callback: function (err, response) {
+                if (err) {
+                    reject(err.message || err);
+                } else {
+                    console.log(response);
+                    resolve(response);
+                }
             }
-        }
+        });
+
+        startQueue();
     });
+};
 
-    startQueue();
-
-    return defer.promise;
+exports.getBalance = function (apiKey, apiSecret) {
+    return new Promise((resolve, reject) => {
+        createClient(apiKey, apiSecret).getBalance(function (err, response) {
+            if (err) {
+                reject(err.message || err);
+            } else {
+                resolve(response.value);
+            }
+        })
+    });
 };

@@ -28,6 +28,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const router = express.Router();
 
+router.post('/balance', googleController.sanitizeSheetUrl, googleController.authenticateMiddleware, sheetController.findSheetBySheetId, async function (req, res, next) {
+    try {
+        res.status(200).json({remainingBalance: await messageController.getBalance(req.sheetDoc.apiKey, req.sheetDoc.apiSecret)});
+    } catch (e) {
+        next(e);
+    }
+});
+
 router.post('/read-data', googleController.sanitizeSheetUrl, googleController.authenticateMiddleware, sheetController.findSheetBySheetId, function (req, res, next) {
     googleController.getSpreadSheetData(req.authClient, req.sheetId, req.body.headerRow)
         .then(function (result) {
@@ -126,4 +134,12 @@ process.on('SIGTERM', function (err) {
     server.close(function () {
         process.exit(0);
     });
+});
+
+process.on('uncaughtException', function (err) {
+    console.error('!!! uncaughtException happened %s stack: %s', err ? err.stack || err.toString() : '');
+});
+
+process.on('unhandledRejection', function (err) {
+    console.error('!!! unhandledRejection happened %s stack: %s', err ? err.stack || err.toString() : '');
 });
