@@ -109,7 +109,7 @@ exports.receiveMessage = async function (req, res, next) {
     var smsSenderNumber = req.query.to || req.body.to;
 
     try {
-        var sheet = await sheetCont.findSheetByGuestPhone(phone, smsSenderNumber)
+        var sheet = await sheetCont.findSheetByGuestPhone(phone, smsSenderNumber);
 
         if (!sheet) {
             next('no sheet doc');
@@ -141,11 +141,15 @@ exports.receiveMessage = async function (req, res, next) {
                         if (numbers && numbers.length > 1) {
                             numbers.forEach(numberRegex => {
                                 if (/ילד/.test(numberRegex)) {
-                                    approvedKidCount = parseInt(numberRegex);
+                                    approvedKidCount = parseInt(numberRegex || 0);
                                 } else {
-                                    approvedCount = parseInt(numberRegex);
+                                    approvedCount = parseInt(numberRegex || 0);
                                 }
                             });
+
+                            if (/ילד/.test(messageText) && !approvedKidCount) {
+                                approvedKidCount = 1;
+                            }
 
                             isSendApprovalMessage = true;
                         } else if (/צמחוני/.test(messageText)) {
