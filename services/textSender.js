@@ -63,7 +63,7 @@ exports.getBalance = function (apiKey, apiSecret) {
             if (err) {
                 reject(err.message || err);
             } else {
-                resolve(response.value);
+                resolve((response || {}).value || 0);
             }
         })
     });
