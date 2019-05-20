@@ -3,6 +3,7 @@ const Nexmo = require('simple-nexmo');
 const phone = require('phone');
 const NEXMO_KEY = process.env.NEXMO_KEY;
 const NEXMO_SECRET = process.env.NEXMO_SECRET;
+const NEXMO_SENDER_NUMBER = process.env.NEXMO_SENDER_NUMBER;
 
 var queue = [];
 var promise = null;
@@ -19,7 +20,7 @@ function startQueue() {
             var queueItem = queue.pop();
 
             createClient(queueItem.apiKey, queueItem.apiSecret).sendSMSMessage({
-                from: queueItem.smsSenderNumber,
+                from: queueItem.smsSenderNumber || NEXMO_SENDER_NUMBER,
                 to: queueItem.phoneNumber,
                 text: queueItem.sms,
                 type: 'unicode'
