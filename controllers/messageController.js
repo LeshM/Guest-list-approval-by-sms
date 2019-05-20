@@ -112,7 +112,7 @@ exports.receiveMessage = async function (req, res, next) {
         var sheet = await sheetCont.findSheetByGuestPhone(phone, smsSenderNumber);
 
         if (!sheet) {
-            next('no sheet doc');
+            next(`no sheet doc - messageId: ${messageId}, phone: ${phone}, smsSenderNumber: ${smsSenderNumber}, messageText: "${messageText}"`);
         } else {
             res.status(200).end();
 
