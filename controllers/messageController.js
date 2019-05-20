@@ -87,11 +87,11 @@ exports.sendMessage = async function (req, res, next) {
     try {
         var response = await messageController.sendMessageToGuest(phone, message, smsSenderNumber, isOnlyToUnsentNumbers, isOnlyToApprovedGuests, isOnlyToGuestsWithNoAnswer, isOnlyToGuestsWhoBroughtGifts);
         var remainingBalance;
-        
+
         if (response && response.messages && response.messages.length && response.messages[0]) {
             remainingBalance = response.messages[0]['remaining-balance'];
         }
-        
+
         res.status(200).json({remainingBalance: remainingBalance});
     } catch (e) {
         if (e && e.status) {
@@ -141,9 +141,9 @@ exports.receiveMessage = async function (req, res, next) {
                         if (numbers && numbers.length > 1) {
                             numbers.forEach(numberRegex => {
                                 if (/ילד/.test(numberRegex)) {
-                                    approvedKidCount = parseInt(numberRegex || 0);
+                                    approvedKidCount = approvedKidCount || parseInt(numberRegex || 0);
                                 } else {
-                                    approvedCount = parseInt(numberRegex || 0);
+                                    approvedCount = approvedCount || parseInt(numberRegex || 0);
                                 }
                             });
 

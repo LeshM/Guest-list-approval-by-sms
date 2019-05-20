@@ -269,6 +269,7 @@ angular.module('wedApp', ['ngMaterial', 'webStorageModule', 'alertConfirm', 'md.
             })
                 .then(function (response) {
                     guest.sentMessageCount = (guest.sentMessageCount || 0) + 1;
+                    guest.messages = guest.messages || [];
                     guest.messages.push({
                         messageId: Date.now(),
                         messageText: message,
