@@ -144,7 +144,7 @@ exports.findSheetByGuestPhone = async function (guestPhone, smsSenderNumber) {
         .limit(1)
         .exec();
 
-    return sheets && sheets.length > 1 ? sheets[0] : null;
+    return sheets && sheets.length ? sheets[0] : null;
 };
 
 exports.saveGuestMessage = function (sheet, guest, message) {
