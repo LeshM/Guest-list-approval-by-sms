@@ -137,10 +137,14 @@ exports.findSheetBySheetId = function (req, res, next) {
         .catch(next);
 };
 
-exports.findSheetByGuestPhone = function (guestPhone, smsSenderNumber) {
+exports.findSheetByGuestPhone = async function (guestPhone, smsSenderNumber) {
     guestPhone = guestPhone.replace(/^0/, '');
-    return Sheet.findOne({'guests.phoneNumber': new RegExp('0?' + guestPhone), smsSenderNumber: smsSenderNumber})
+    var sheets = await Sheet.find({'guests.phoneNumber': new RegExp('^0?' + guestPhone), smsSenderNumber: smsSenderNumber})
+        .sort({_id: -1})
+        .limit(1)
         .exec();
+
+    return sheets && sheets.length > 1 ? sheets[0] : null;
 };
 
 exports.saveGuestMessage = function (sheet, guest, message) {
