@@ -137,9 +137,9 @@ exports.findSheetBySheetId = function (req, res, next) {
         .catch(next);
 };
 
-exports.findSheetByGuestPhone = async function (guestPhone, smsSenderNumber) {
+exports.findSheetByGuestPhone = async function (guestPhone) {
     guestPhone = guestPhone.replace(/^0/, '');
-    var sheets = await Sheet.find({'guests.phoneNumber': new RegExp('^0?' + guestPhone), smsSenderNumber: smsSenderNumber})
+    var sheets = await Sheet.find({'guests.phoneNumber': new RegExp('^0?' + guestPhone)})
         .sort({_id: -1})
         .limit(1)
         .exec();

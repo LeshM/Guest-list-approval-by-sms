@@ -40,7 +40,7 @@ function sendMessageToGuestAndUpdateSheet(sheet, guest, message, smsSenderNumber
 exports.sendMessageToGuest = function (phone, message, smsSenderNumber, isOnlyToUnsentNumbers, isOnlyToApprovedGuests, isOnlyToGuestsWithNoAnswer, isOnlyToGuestsWhoBroughtGifts) {
     var deferred = Q.defer();
 
-    sheetCont.findSheetByGuestPhone(phone, smsSenderNumber)
+    sheetCont.findSheetByGuestPhone(phone)
         .then(function (sheet) {
             if (!sheet) {
                 deferred.reject({status: 403, message: 'לא נמצא אורח עם הטלפון: ' + phone});
@@ -109,7 +109,7 @@ exports.receiveMessage = async function (req, res, next) {
     var smsSenderNumber = req.query.to || req.body.to;
 
     try {
-        var sheet = await sheetCont.findSheetByGuestPhone(phone, smsSenderNumber);
+        var sheet = await sheetCont.findSheetByGuestPhone(phone);
 
         if (!sheet) {
             next(`no sheet doc - messageId: ${messageId}, phone: ${phone}, smsSenderNumber: ${smsSenderNumber}, messageText: "${messageText}"`);
