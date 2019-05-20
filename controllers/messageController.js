@@ -130,8 +130,8 @@ exports.receiveMessage = async function (req, res, next) {
                         });
 
                         var isSendApprovalMessage = false;
-                        var approvedCount = guest.approvedGuestCount || 0;
-                        var approvedKidCount = guest.approvedKidCount || 0;
+                        var approvedCount = null;
+                        var approvedKidCount = null;
                         var numbers = /(\d\s*[א-ת]*)\s*[א-ת]?\s*-?\s*(\d\s*[א-ת]*)?/g.exec(messageText);
                         if (numbers && numbers.length) {
                             // Remove the input result
@@ -141,13 +141,15 @@ exports.receiveMessage = async function (req, res, next) {
                         if (numbers && numbers.length > 1) {
                             numbers.forEach(numberRegex => {
                                 if (/ילד/.test(numberRegex)) {
-                                    approvedKidCount = approvedKidCount || parseInt(numberRegex || 0);
-                                } else {
-                                    approvedCount = approvedCount || parseInt(numberRegex || 0);
+                                    if (approvedKidCount === null) {
+                                        approvedKidCount = parseInt(numberRegex || 0);
+                                    }
+                                } else if (approvedCount === null) {
+                                    approvedCount = parseInt(numberRegex || 0);
                                 }
                             });
 
-                            if (/ילד/.test(messageText) && !approvedKidCount) {
+                            if (/ילד/.test(messageText) && approvedKidCount === null) {
                                 approvedKidCount = 1;
                             }
 
@@ -170,7 +172,7 @@ exports.receiveMessage = async function (req, res, next) {
 
                         try {
                             if (isSendApprovalMessage) {
-                                await sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber, false, true);
+                                await sendMessageToGuestAndUpdateSheet(sheet, guest, sheet.approval, smsSenderNumber);
                             }
 
                             await sheet.save();
